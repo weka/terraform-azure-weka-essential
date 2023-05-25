@@ -15,7 +15,6 @@ module "network" {
   rg_name         = var.vnet_rg_name
   address_space   = var.address_space
   subnet_prefixes = var.subnet_prefixes
-  private_network = var.private_network
 }
 
 data azurerm_resource_group "rg" {

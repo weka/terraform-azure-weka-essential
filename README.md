@@ -52,9 +52,6 @@ You can pass
 private_network   = true
 ``` 
 This param will make the deployment skip public ip creation for our vms.
-If you also create the network resources (by not passing the params mentioned above)
-this param will skip adding ssh permissions rule on the security group we create.
-
 ## Ssh keys
 The username for ssh into vms is `weka`.
 We allow passing exising public key string:
