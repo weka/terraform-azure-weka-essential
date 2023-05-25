@@ -21,7 +21,7 @@ data "template_file" "clusterize" {
     nics_num          = var.container_number_map[var.instance_type].nics
     get_weka_io_token = var.get_weka_io_token
     weka_version      = var.weka_version
-    private_ips       = join(" ", slice(azurerm_network_interface.public_first_nic.*.private_ip_address, 0, var.cluster_size - 1))
+    private_ips       = join(" ", slice(local.first_nic_private_ips, 0, var.cluster_size - 1))
     vm_names          = join(" ", local.vms_computer_names)
     cluster_name      = var.cluster_name
     cluster_size      = var.cluster_size
