@@ -12,6 +12,7 @@ variable "rg_name" {
 variable "vnet_rg_name" {
   type = string
   description = "Resource group name of vnet"
+  default = ""
 }
 
 variable "vm_username" {
