@@ -3,7 +3,7 @@ Essential weka deployment.
 <br>Creates vms and proximity placement group. Proximity placement group id can be passed and then it will not be created.
 <br>The deployment can use existing network or create vnet/subnets/security groups.
 - This deployment assumes that the vms will have outbound internet access.
-- This deployment was created for weka POC with minimum permissions.
+- This deployment was created for essential weka deployment with minimum permissions.
 - This deployment doesn't support auto-scaling.
 - If you wish to review our full solution you can find it [here](https://github.com/weka/terraform-azure-weka)
 ## Weke deployment prerequisites:
