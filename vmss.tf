@@ -60,6 +60,8 @@ locals {
   alphanumeric_prefix_name  = lower(replace(var.prefix, "/\\W|_|\\s/", ""))
   subnet_range              = data.azurerm_subnet.subnets[0].address_prefix
   nics_numbers              = var.install_cluster_dpdk ? var.container_number_map[var.instance_type].nics : 1
+  first_nic_ids             = var.private_network ? azurerm_network_interface.private_first_nic.*.id : azurerm_network_interface.public_first_nic.*.id
+  vms_computer_names        = [for i in range(var.cluster_size - 1) : "${var.prefix}-${var.cluster_name}-backend-${i}"]
 }
 
 data "template_file" "deploy" {
@@ -107,109 +109,66 @@ resource "azurerm_proximity_placement_group" "ppg" {
   }
 }
 
-resource "azurerm_linux_virtual_machine_scale_set" "vms" {
-  name                            = "${var.prefix}-${var.cluster_name}-vmss"
-  location                        = data.azurerm_resource_group.rg.location
-  resource_group_name             = var.rg_name
-  sku                             = var.instance_type
-  upgrade_mode                    = "Manual"
-  admin_username                  = var.vm_username
-  instances                       = var.cluster_size - 1
-  computer_name_prefix            = "${var.prefix}-${var.cluster_name}-backend"
-  custom_data                     = base64encode(data.template_file.deploy.rendered)
-  disable_password_authentication = true
-  overprovision                   = false
-  proximity_placement_group_id    = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
-  tags                            = merge(var.tags_map, {
+resource "azurerm_virtual_machine" "vms" {
+  count               = var.cluster_size - 1
+  name                = "${var.prefix}-${var.cluster_name}-${count.index}"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = var.rg_name
+  vm_size             = var.instance_type
+  os_profile {
+    admin_username = var.vm_username
+    computer_name  = local.vms_computer_names[count.index]
+    custom_data    = base64encode(data.template_file.deploy.rendered)
+  }
+  proximity_placement_group_id = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
+  tags                         = merge(var.tags_map, {
     "weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id
   })
   #  source_image_id = "/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a/resourceGroups/weka-tf/providers/Microsoft.Compute/images/weka-ubuntu20-ofed-5.8-1.1.2.1"
-  source_image_reference {
+  storage_image_reference {
     offer     = lookup(var.linux_vm_image, "offer", null)
     publisher = lookup(var.linux_vm_image, "publisher", null)
     sku       = lookup(var.linux_vm_image, "sku", null)
     version   = lookup(var.linux_vm_image, "version", null)
   }
 
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "StandardSSD_LRS"
+  storage_os_disk {
+    caching       = "ReadWrite"
+    create_option = "FromImage"
+    name          = "os_disk-${var.prefix}-${var.cluster_name}-${count.index}"
   }
-  data_disk {
-    lun                  = 0
-    caching              = "ReadWrite"
-    create_option        = "Empty"
-    disk_size_gb         = local.disk_size
-    storage_account_type = "StandardSSD_LRS"
+  storage_data_disk {
+    lun           = 0
+    caching       = "ReadWrite"
+    create_option = "Empty"
+    disk_size_gb  = local.disk_size
+    name          = "traces-${var.prefix}-${var.cluster_name}-${count.index}"
   }
 
-  admin_ssh_key {
-    username   = var.vm_username
-    public_key = local.public_ssh_key
+  os_profile_linux_config {
+    ssh_keys {
+      key_data = local.public_ssh_key
+      path     = "/home/weka/.ssh/authorized_keys"
+    }
+    disable_password_authentication = true
   }
+
 
   identity {
     type = "SystemAssigned"
   }
 
-  dynamic "network_interface" {
-    for_each = range(local.private_nic_first_index)
-    content {
-      name                          = "${var.prefix}-${var.cluster_name}-backend-nic-0"
-      primary                       = true
-      enable_accelerated_networking = var.install_cluster_dpdk
-      ip_configuration {
-        primary   = true
-        name      = "ipconfig0"
-        subnet_id = data.azurerm_subnet.subnets[0].id
-        public_ip_address {
-          name              = "${var.prefix}-${var.cluster_name}-public-ip"
-          domain_name_label = "${var.prefix}-${var.cluster_name}-backend"
-        }
-      }
-    }
-  }
-  dynamic "network_interface" {
-    for_each = range(local.private_nic_first_index, 1)
-    content {
-      name                          = "${var.prefix}-${var.cluster_name}-backend-nic-0"
-      primary                       = true
-      enable_accelerated_networking = var.install_cluster_dpdk
-      ip_configuration {
-        primary   = true
-        name      = "ipconfig0"
-        subnet_id = data.azurerm_subnet.subnets[0].id
-      }
-    }
-  }
-  dynamic "network_interface" {
-    for_each = range(1, local.nics_numbers)
-    content {
-      name                          = "${var.prefix}-${var.cluster_name}-backend-nic-${network_interface.value}"
-      primary                       = false
-      enable_accelerated_networking = var.install_cluster_dpdk
-      ip_configuration {
-        primary   = false
-        name      = "ipconfig${network_interface.value}"
-        subnet_id = data.azurerm_subnet.subnets[network_interface.value].id
-      }
-    }
-  }
+  primary_network_interface_id = local.first_nic_ids[count.index]
+  network_interface_ids        = concat(
+    [local.first_nic_ids[count.index]],
+    slice(azurerm_network_interface.private_nics.*.id, ( local.nics_numbers - 1 )* count.index, (local.nics_numbers - 1) * (count.index + 1))
+  )
   lifecycle {
-    ignore_changes = [instances, custom_data, tags]
+    ignore_changes = [tags]
   }
-  depends_on = [module.network]
-}
-
-data "azurerm_virtual_machine_scale_set" "vms" {
-  name                = azurerm_linux_virtual_machine_scale_set.vms.name
-  resource_group_name = var.rg_name
+  depends_on = [module.network, azurerm_proximity_placement_group.ppg]
 }
 
 output "vms_private_ips" {
-  value = data.azurerm_virtual_machine_scale_set.vms.instances.*.private_ip_address
-}
-
-output "vms_public_ips" {
-  value = data.azurerm_virtual_machine_scale_set.vms.instances.*.public_ip_address
+  value = azurerm_network_interface.public_first_nic.*.private_ip_address
 }

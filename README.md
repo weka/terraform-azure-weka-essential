@@ -1,6 +1,7 @@
 # Azure-weka deployment Terraform package
 Essential weka deployment.
-<br>Creates 2 Vmss and can use existing network or create vnet/subnets/sgs.
+<br>Creates vms and proximity placement group. Proximity placement group id can be passed and then it will not be created.
+<br>The deployment can use existing network or create vnet/subnets/security groups.
 - This deployment assumes that the vms will have outbound internet access.
 - This deployment was created for weka POC with minimum permissions.
 - This deployment doesn't support auto-scaling.
