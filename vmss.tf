@@ -12,7 +12,7 @@ module "network" {
   source          = "./network"
   subscription_id = var.subscription_id
   prefix          = var.prefix
-  rg_name         = var.vnet_rg_name
+  rg_name         = local.vnet_rg_name
   address_space   = var.address_space
   subnet_prefixes = var.subnet_prefixes
 }
@@ -23,7 +23,7 @@ data azurerm_resource_group "rg" {
 
 data "azurerm_subnet" "subnets" {
   count                = length(var.subnets) > 0 ? length(var.subnets) : length(module.network[0].subnets_names)
-  resource_group_name  = var.vnet_rg_name
+  resource_group_name  = local.vnet_rg_name
   virtual_network_name = var.vnet_name != "" ? var.vnet_name : module.network[0].vnet_name
   name                 = length(var.subnets) > 0 ? var.subnets[count.index] : module.network[0].subnets_names[count.index]
   depends_on           = [module.network]
@@ -61,6 +61,7 @@ locals {
   nics_numbers              = var.install_cluster_dpdk ? var.container_number_map[var.instance_type].nics : 1
   first_nic_ids             = var.private_network ? azurerm_network_interface.private_first_nic.*.id : azurerm_network_interface.public_first_nic.*.id
   vms_computer_names        = [for i in range(var.cluster_size - 1) : "${var.prefix}-${var.cluster_name}-backend-${i}"]
+  vnet_rg_name              = var.vnet_rg_name != "" ? var.vnet_rg_name : var.rg_name
 }
 
 data "template_file" "deploy" {
