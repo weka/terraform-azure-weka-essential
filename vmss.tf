@@ -145,6 +145,8 @@ resource "azurerm_virtual_machine" "vms" {
     disk_size_gb  = local.disk_size
     name          = "traces-${var.prefix}-${var.cluster_name}-${count.index}"
   }
+  delete_os_disk_on_termination = true
+  delete_data_disks_on_termination = true
 
   os_profile_linux_config {
     ssh_keys {
