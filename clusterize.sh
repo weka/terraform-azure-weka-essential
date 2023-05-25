@@ -253,7 +253,10 @@ host_ips=$(IFS=, ;echo "$${HOST_IPS[*]}")
 host_names=$(IFS=' ' ;echo "$${HOST_NAMES[*]}")
 
 vms_string=$(printf "%s "  "$${VMS[@]}" | rev | cut -c2- | rev)
-weka cluster create $host_names --host-ips $host_ips
+while ! weka cluster create $host_names --host-ips $host_ips
+do
+    sleep 10
+done
 
 if [[ $INSTALL_DPDK == true ]]; then
 	
