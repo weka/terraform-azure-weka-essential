@@ -29,9 +29,3 @@ variable "tags_map" {
   default = {"weka_deployment": "azure-essential"}
   description = "A map of tags to assign the same metadata to all resources in the environment. Format: key:value."
 }
-
-variable "private_network" {
-  type = bool
-  default = false
-  description = "Determines whether to enable a private or public network. The default is public network."
-}

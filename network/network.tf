@@ -29,10 +29,9 @@ resource "azurerm_subnet" "subnet" {
 
 # ====================== sg ssh ========================== #
 resource "azurerm_network_security_rule" "sg_public_ssh" {
-  count                       = var.private_network ? 0 : 1
-  name                        = "${var.prefix}-ssh-sg-${count.index}"
+  name                        = "${var.prefix}-ssh-sg"
   resource_group_name         = data.azurerm_resource_group.rg.name
-  priority                    = "100${count.index}"
+  priority                    = "1000"
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
