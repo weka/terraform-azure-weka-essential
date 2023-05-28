@@ -111,7 +111,7 @@ variable "private_network" {
 
 variable "ofed_version" {
   type = string
-  description = "The OFED driver version to for ubuntu 18."
+  description = "The OFED driver version to for ubuntu 20."
   default = "5.8-1.1.2.1"
 }
 

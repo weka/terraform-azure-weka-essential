@@ -10,6 +10,18 @@ Essential weka deployment.
 - vnet
 - subnets
 
+## Resource group
+We have 2 variables that define resource group:
+- rg_name
+- vnet_rg_name
+#### rg_name:
+The resource group were weka cluster and all necessary resources will be deployed.
+#### vnet_rg_name:
+The resource group of the vnet and subnets.
+<br>If `vnet_rg_name` isn't set by the user, we assume that the
+vnet and subnets resource group is the as the weka deployment resource group.
+<br> i.e we assume `vnet_rg_name = rg_name`
+
 ## Deployment options
 We can use exiting network, or create network resources (vmet, subnets, security group) automatically.
 <br>We provided example variables file `vars.auto.tfvars` with the variables that should be supplied.
