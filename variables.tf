@@ -47,8 +47,12 @@ variable "address_space" {
 
 variable "subnet_prefixes" {
   type = list(string)
-  description = "A list of address prefixes to use for the subnet. Relevant only for network creation mode, where subnets weren't supplied."
-  default = ["10.0.2.0/24","10.0.3.0/24","10.0.4.0/24","10.0.5.0/24"]
+  description = <<EOF
+    A list of address prefixes to use for the subnet.
+    Relevant only for network creation mode, where subnets weren't supplied.
+    The number of subnets to use wil be determined according to the instance type"
+  EOF
+  default = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24", "10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24", "10.0.7.0/24"]
 }
 
 variable "cluster_size" {

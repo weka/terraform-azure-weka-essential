@@ -14,7 +14,7 @@ module "network" {
   prefix          = var.prefix
   rg_name         = local.vnet_rg_name
   address_space   = var.address_space
-  subnet_prefixes = var.subnet_prefixes
+  subnet_prefixes = slice(var.subnet_prefixes, 0, var.container_number_map[var.instance_type].nics)
 }
 
 data azurerm_resource_group "rg" {
