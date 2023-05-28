@@ -60,7 +60,7 @@ locals {
   subnet_range              = data.azurerm_subnet.subnets[0].address_prefix
   nics_numbers              = var.install_cluster_dpdk ? var.container_number_map[var.instance_type].nics : 1
   first_nic_ids             = var.private_network ? azurerm_network_interface.private_first_nic.*.id : azurerm_network_interface.public_first_nic.*.id
-  first_nic_private_ips             = var.private_network ? azurerm_network_interface.private_first_nic.*.private_ip_address : azurerm_network_interface.public_first_nic.*.private_ip_address
+  first_nic_private_ips     = var.private_network ? azurerm_network_interface.private_first_nic.*.private_ip_address : azurerm_network_interface.public_first_nic.*.private_ip_address
   vms_computer_names        = [for i in range(var.cluster_size - 1) : "${var.prefix}-${var.cluster_name}-backend-${i}"]
   vnet_rg_name              = var.vnet_rg_name != "" ? var.vnet_rg_name : var.rg_name
 }
@@ -91,14 +91,6 @@ data "template_file" "deploy" {
   }
 }
 
-data "template_cloudinit_config" "cloud_init_deploy" {
-  gzip = false
-  part {
-    content_type = "text/x-shellscript"
-    content      = data.template_file.deploy.rendered
-  }
-}
-
 resource "azurerm_proximity_placement_group" "ppg" {
   count               = var.placement_group_id == "" ? 1 : 0
   name                = "${var.prefix}-${var.cluster_name}-backend-ppg"
@@ -125,7 +117,6 @@ resource "azurerm_virtual_machine" "vms" {
   tags                         = merge(var.tags_map, {
     "weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id
   })
-  #  source_image_id = "/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a/resourceGroups/weka-tf/providers/Microsoft.Compute/images/weka-ubuntu20-ofed-5.8-1.1.2.1"
   storage_image_reference {
     offer     = lookup(var.linux_vm_image, "offer", null)
     publisher = lookup(var.linux_vm_image, "publisher", null)
@@ -145,7 +136,7 @@ resource "azurerm_virtual_machine" "vms" {
     disk_size_gb  = local.disk_size
     name          = "traces-${var.prefix}-${var.cluster_name}-${count.index}"
   }
-  delete_os_disk_on_termination = true
+  delete_os_disk_on_termination    = true
   delete_data_disks_on_termination = true
 
   os_profile_linux_config {
