@@ -222,4 +222,3 @@ do
   ready_containers=$( weka local ps | grep -i 'running' | wc -l )
   echo "Running containers: $ready_containers"
 done
-

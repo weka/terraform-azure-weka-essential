@@ -1,43 +1,17 @@
 data "template_file" "clusterize" {
   template = file("${path.module}/clusterize.sh")
   vars     = {
-    user                 = var.vm_username
-    ofed_version         = var.ofed_version
-    install_ofed         = var.install_ofed
-    install_ofed_url     = var.install_ofed_url
+    vm_names             = join(" ", local.vms_computer_names)
+    private_ips          = join(" ", slice(local.first_nic_private_ips, 0, var.cluster_size - 1))
+    cluster_name         = var.cluster_name
+    cluster_size         = var.cluster_size
+    nvmes_num            = var.container_number_map[var.instance_type].nvme
+    stripe_width         = var.stripe_width
+    protection_level     = var.protection_level
+    hotspare             = var.hotspare
     install_cluster_dpdk = var.install_cluster_dpdk
-    subnet_range         = local.subnet_range
-    nics_num             = local.nics_numbers
-    disk_size            = local.disk_size
-    all_subnets          = join(" ", [
-    for item in data.azurerm_subnet.subnets.*.address_prefix :
-    split("/", item)[0]
-    ])
-    subnet_prefixes   = join(" ", [for item in data.azurerm_subnet.subnets.*.address_prefix : item])
-    memory            = var.container_number_map[var.instance_type].memory
-    compute_num       = var.container_number_map[var.instance_type].compute
-    frontend_num      = var.container_number_map[var.instance_type].frontend
-    drive_num         = var.container_number_map[var.instance_type].drive
-    nics_num          = var.container_number_map[var.instance_type].nics
-    get_weka_io_token = var.get_weka_io_token
-    weka_version      = var.weka_version
-    private_ips       = join(" ", slice(local.first_nic_private_ips, 0, var.cluster_size - 1))
-    vm_names          = join(" ", local.vms_computer_names)
-    cluster_name      = var.cluster_name
-    cluster_size      = var.cluster_size
-    nvmes_num         = var.container_number_map[var.instance_type].nvme
-    stripe_width      = var.stripe_width
-    protection_level  = var.protection_level
-    hotspare          = var.hotspare
   }
-}
-
-data "template_cloudinit_config" "cloud_init_clusterize" {
-  gzip = false
-  part {
-    content_type = "text/x-shellscript"
-    content      = data.template_file.clusterize.rendered
-  }
+  depends_on = [azurerm_virtual_machine.vms]
 }
 
 resource "azurerm_virtual_machine" "clusterizing" {
@@ -48,13 +22,12 @@ resource "azurerm_virtual_machine" "clusterizing" {
   os_profile {
     admin_username = var.vm_username
     computer_name  = "${var.prefix}-${var.cluster_name}-backend-${var.cluster_size - 1}"
-    custom_data    = base64encode(data.template_file.clusterize.rendered)
+    custom_data    = base64encode(format("%s\n%s", data.template_file.deploy.rendered, data.template_file.clusterize.rendered))
   }
   proximity_placement_group_id = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
   tags                         = merge(var.tags_map, {
     "weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id
   })
-  #  source_image_id = "/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a/resourceGroups/weka-tf/providers/Microsoft.Compute/images/weka-ubuntu20-ofed-5.8-1.1.2.1"
   storage_image_reference {
     offer     = lookup(var.linux_vm_image, "offer", null)
     publisher = lookup(var.linux_vm_image, "publisher", null)
@@ -73,7 +46,7 @@ resource "azurerm_virtual_machine" "clusterizing" {
     disk_size_gb  = local.disk_size
     name          = "traces-${var.prefix}-${var.cluster_name}-${var.cluster_size - 1}"
   }
-  delete_os_disk_on_termination = true
+  delete_os_disk_on_termination    = true
   delete_data_disks_on_termination = true
 
   os_profile_linux_config {
@@ -96,5 +69,5 @@ resource "azurerm_virtual_machine" "clusterizing" {
   lifecycle {
     ignore_changes = [tags]
   }
-  depends_on = [module.network, azurerm_proximity_placement_group.ppg]
+  depends_on = [module.network, azurerm_proximity_placement_group.ppg, azurerm_virtual_machine.vms]
 }

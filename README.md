@@ -22,16 +22,18 @@ The resource group of the vnet and subnets.
 vnet and subnets resource group is the as the weka deployment resource group.
 <br> i.e we assume `vnet_rg_name = rg_name`
 
-## Deployment options
-We can use exiting network, or create network resources (vmet, subnets, security group) automatically.
-<br>We provided example variables file `vars.auto.tfvars` with the variables that should be supplied.
-<br>In case you want to use existing network, you must provide network params, for example:
+## Network deployment options
+This weka deployment can use exiting network, or create network resources (vmet, subnets, security group) automatically.
+<br>We provided a file named `vars.auto.tfvars` with example of the variables that should be supplied.
+<br>In case you want to use an existing network, you **must** provide network params.
+<br>**Example**:
 ```hcl
 vnet_name           = "essential-vnet"
 subnets             = ["essential-subnet-0", "essential-subnet-1", "essential-subnet-2", "essential-subnet-3"]
 ```
-If you don't pass these params, we will automatically create the network resources.
-## Exiting network vars.auto.tfvars example:
+**If you don't pass these params, we will automatically create the network resources.**
+### Weka deployment using exiting network full example:
+`vars.auto.tfvars` :
 ```hcl
 subscription_id     = "..."
 get_weka_io_token   = "..."
@@ -44,8 +46,9 @@ vnet_name           = "essential-vnet"
 subnets             = ["essential-subnet-0", "essential-subnet-1", "essential-subnet-2", "essential-subnet-3"]
 ```
 
-## Creating network resources: vnet, subnets, security group vars.auto.tfvars example:
-When the network param above are not supplied we automatically create the network resources for you.
+### Weka deployment creating network resources (vnet, subnets, security group) full example:
+Note: the network params from above are not supplied here
+`vars.auto.tfvars` :
 ```hcl
 subscription_id     = "..."
 get_weka_io_token   = "..."
@@ -56,7 +59,7 @@ instance_type       = "Standard_L8s_v3"
 cluster_size        = 6
 ```
 
-## Private network deployment:
+### Private network deployment:
 You can pass
 ```hcl
 private_network   = true
