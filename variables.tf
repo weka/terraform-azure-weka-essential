@@ -52,7 +52,7 @@ variable "subnet_prefixes" {
     Relevant only for network creation mode, where subnets weren't supplied.
     The number of subnets to use wil be determined according to the instance type"
   EOF
-  default     = [
+  default = [
     "10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24", "10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24",
     "10.0.7.0/24"
   ]
@@ -72,7 +72,7 @@ variable "cluster_size" {
 variable "linux_vm_image" {
   type        = map(string)
   description = "The default azure vm image reference."
-  default     = {
+  default = {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-focal"
     sku       = "20_04-lts-gen2"
@@ -138,7 +138,7 @@ variable "container_number_map" {
     memory   = string
   }))
   description = "Maps the number of objects and memory size per machine type."
-  default     = {
+  default = {
     Standard_L8s_v3 = {
       compute  = 1
       drive    = 1
@@ -285,4 +285,22 @@ variable "tiering_ssd_percent" {
   type        = number
   default     = 20
   description = "When set_obs_integration is true, this variable sets the capacity percentage of the filesystem that resides on SSD. For example, for an SSD with a total capacity of 20GB, and the tiering_ssd_percent is set to 20, the total available capacity is 100GB."
+}
+
+variable "clients_number" {
+  type        = number
+  description = "The number of client virtual machines to deploy."
+  default     = 0
+}
+
+variable "client_instance_type" {
+  type        = string
+  description = "The client virtual machine type (sku) to deploy."
+  default     = "Standard_D4_v4"
+}
+
+variable "client_nics_num" {
+  type        = string
+  description = "The client NICs number."
+  default     = 2
 }
