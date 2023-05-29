@@ -54,9 +54,6 @@ locals {
   ssh_path                  = "/tmp/${var.prefix}-${var.cluster_name}"
   public_ssh_key            = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
   disk_size                 = var.default_disk_size + var.traces_per_ionode * (var.container_number_map[var.instance_type].compute + var.container_number_map[var.instance_type].drive + var.container_number_map[var.instance_type].frontend)
-  private_nic_first_index   = var.private_network ? 0 : 1
-  alphanumeric_cluster_name = lower(replace(var.cluster_name, "/\\W|_|\\s/", ""))
-  alphanumeric_prefix_name  = lower(replace(var.prefix, "/\\W|_|\\s/", ""))
   subnet_range              = data.azurerm_subnet.subnets[0].address_prefix
   nics_numbers              = var.install_cluster_dpdk ? var.container_number_map[var.instance_type].nics : 1
   first_nic_ids             = var.private_network ? azurerm_network_interface.private_first_nic.*.id : azurerm_network_interface.public_first_nic.*.id
