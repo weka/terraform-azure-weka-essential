@@ -11,7 +11,7 @@ NVMES_NUM=${nvmes_num}
 STRIPE_WIDTH=${stripe_width}
 PROTECTION_LEVEL=${protection_level}
 HOTSPARE=${hotspare}
-INSTALL_DPDK=${install_cluster_dpdk}
+INSTALL_DPDK=${install_dpdk}
 SET_OBS=${set_obs}
 
 CONTAINER_NAMES=(drives0 compute0 frontend0)

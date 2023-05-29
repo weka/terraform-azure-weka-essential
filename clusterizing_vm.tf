@@ -1,20 +1,20 @@
 data "template_file" "clusterize" {
   template = file("${path.module}/clusterize.sh")
-  vars     = {
-    vm_names             = join(" ", local.vms_computer_names)
-    private_ips          = join(" ", slice(local.first_nic_private_ips, 0, var.cluster_size - 1))
-    cluster_name         = var.cluster_name
-    cluster_size         = var.cluster_size
-    nvmes_num            = var.container_number_map[var.instance_type].nvme
-    stripe_width         = var.stripe_width
-    protection_level     = var.protection_level
-    hotspare             = var.hotspare
-    install_cluster_dpdk = var.install_cluster_dpdk
-    set_obs              = var.set_obs
-    tiering_ssd_percent  = var.tiering_ssd_percent
-    obs_name             = var.obs_name
-    obs_container_name   = var.obs_container_name
-    blob_obs_access_key  = var.blob_obs_access_key
+  vars = {
+    vm_names            = join(" ", local.vms_computer_names)
+    private_ips         = join(" ", slice(local.first_nic_private_ips, 0, var.cluster_size - 1))
+    cluster_name        = var.cluster_name
+    cluster_size        = var.cluster_size
+    nvmes_num           = var.container_number_map[var.instance_type].nvme
+    stripe_width        = var.stripe_width
+    protection_level    = var.protection_level
+    hotspare            = var.hotspare
+    install_dpdk        = var.install_cluster_dpdk
+    set_obs             = var.set_obs
+    tiering_ssd_percent = var.tiering_ssd_percent
+    obs_name            = var.obs_name
+    obs_container_name  = var.obs_container_name
+    blob_obs_access_key = var.blob_obs_access_key
   }
   depends_on = [azurerm_virtual_machine.vms]
 }
@@ -27,10 +27,10 @@ resource "azurerm_virtual_machine" "clusterizing" {
   os_profile {
     admin_username = var.vm_username
     computer_name  = "${var.prefix}-${var.cluster_name}-backend-${var.cluster_size - 1}"
-    custom_data    = base64encode(format("%s\n%s", data.template_file.deploy.rendered, data.template_file.clusterize.rendered))
+    custom_data    = base64encode(format("%s\n%s\n%s\n%s", data.template_file.attach_disk.rendered, data.template_file.install_weka.rendered, data.template_file.deploy.rendered, data.template_file.clusterize.rendered))
   }
   proximity_placement_group_id = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
-  tags                         = merge(var.tags_map, {
+  tags = merge(var.tags_map, {
     "weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id
   })
   storage_image_reference {
@@ -67,9 +67,9 @@ resource "azurerm_virtual_machine" "clusterizing" {
   }
 
   primary_network_interface_id = local.first_nic_ids[var.cluster_size - 1]
-  network_interface_ids        = concat(
+  network_interface_ids = concat(
     [local.first_nic_ids[var.cluster_size - 1]],
-    slice(azurerm_network_interface.private_nics.*.id, ( local.nics_numbers - 1 )* (var.cluster_size - 1), (local.nics_numbers - 1) * var.cluster_size)
+    slice(azurerm_network_interface.private_nics.*.id, (local.nics_numbers - 1) * (var.cluster_size - 1), (local.nics_numbers - 1) * var.cluster_size)
   )
   lifecycle {
     ignore_changes = [tags]
