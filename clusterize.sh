@@ -12,6 +12,7 @@ STRIPE_WIDTH=${stripe_width}
 PROTECTION_LEVEL=${protection_level}
 HOTSPARE=${hotspare}
 INSTALL_DPDK=${install_cluster_dpdk}
+SET_OBS=${set_obs}
 
 CONTAINER_NAMES=(drives0 compute0 frontend0)
 PORTS=(14000 15000 16000)
@@ -73,6 +74,18 @@ weka cluster container
 full_capacity=$(weka status -J | jq .capacity.unprovisioned_bytes)
 weka fs group create default
 weka fs create default default "$full_capacity"B
+
+if [[ ${set_obs} == true ]]; then
+  TIERING_SSD_PERCENT=${tiering_ssd_percent}
+  OBS_NAME=${obs_name}
+  OBS_CONTAINER_NAME=${obs_container_name}
+  OBS_BLOB_KEY=${blob_obs_access_key}
+
+  weka fs tier s3 add azure-obs --site local --obs-name default-local --obs-type AZURE --hostname $OBS_NAME.blob.core.windows.net --port 443 --bucket $OBS_CONTAINER_NAME --access-key-id $OBS_NAME --secret-key $OBS_BLOB_KEY --protocol https --auth-method AWSSignature4
+  weka fs tier s3 attach default azure-obs
+  tiering_percent=$(echo "$full_capacity * 100 / $TIERING_SSD_PERCENT" | bc)
+  weka fs update default --total-capacity "$tiering_percent"B
+fi
 
 if [[ $INSTALL_DPDK == true ]]; then
 	weka alerts mute NodeRDMANotActive 365d
