@@ -23,7 +23,7 @@ data azurerm_resource_group "rg" {
 data "azurerm_subnet" "subnets" {
   count                = length(var.subnets) > 0 ? length(var.subnets) : length(module.network[0].subnets_names)
   resource_group_name  = local.vnet_rg_name
-  virtual_network_name = var.vnet_name != "" ? var.vnet_name : module.network[0].vnet_name
+  virtual_network_name = local.vnet_name
   name                 = length(var.subnets) > 0 ? var.subnets[count.index] : module.network[0].subnets_names[count.index]
   depends_on           = [module.network]
 }
@@ -50,15 +50,16 @@ resource "local_file" "private_key" {
 }
 
 locals {
-  ssh_path                  = "/tmp/${var.prefix}-${var.cluster_name}"
-  public_ssh_key            = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
-  disk_size                 = var.default_disk_size + var.traces_per_ionode * (var.container_number_map[var.instance_type].compute + var.container_number_map[var.instance_type].drive + var.container_number_map[var.instance_type].frontend)
-  subnet_range              = data.azurerm_subnet.subnets[0].address_prefix
-  nics_numbers              = var.install_cluster_dpdk ? var.container_number_map[var.instance_type].nics : 1
-  first_nic_ids             = var.private_network ? azurerm_network_interface.private_first_nic.*.id : azurerm_network_interface.public_first_nic.*.id
-  first_nic_private_ips     = var.private_network ? azurerm_network_interface.private_first_nic.*.private_ip_address : azurerm_network_interface.public_first_nic.*.private_ip_address
-  vms_computer_names        = [for i in range(var.cluster_size - 1) : "${var.prefix}-${var.cluster_name}-backend-${i}"]
-  vnet_rg_name              = var.vnet_rg_name != "" ? var.vnet_rg_name : var.rg_name
+  ssh_path              = "/tmp/${var.prefix}-${var.cluster_name}"
+  public_ssh_key        = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
+  disk_size             = var.default_disk_size + var.traces_per_ionode * (var.container_number_map[var.instance_type].compute + var.container_number_map[var.instance_type].drive + var.container_number_map[var.instance_type].frontend)
+  subnet_range          = data.azurerm_subnet.subnets[0].address_prefix
+  nics_numbers          = var.install_cluster_dpdk ? var.container_number_map[var.instance_type].nics : 1
+  first_nic_ids         = var.private_network ? azurerm_network_interface.private_first_nic.*.id : azurerm_network_interface.public_first_nic.*.id
+  first_nic_private_ips = var.private_network ? azurerm_network_interface.private_first_nic.*.private_ip_address : azurerm_network_interface.public_first_nic.*.private_ip_address
+  vms_computer_names    = [for i in range(var.cluster_size - 1) : "${var.prefix}-${var.cluster_name}-backend-${i}"]
+  vnet_rg_name          = var.vnet_rg_name != "" ? var.vnet_rg_name : var.rg_name
+  vnet_name             = var.vnet_name != "" ? var.vnet_name : module.network[0].vnet_name
 }
 
 data "template_file" "deploy" {
