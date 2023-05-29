@@ -73,6 +73,8 @@ data "template_file" "deploy" {
     subnet_range         = local.subnet_range
     nics_num             = local.nics_numbers
     disk_size            = local.disk_size
+    apt_repo_url         = var.apt_repo_url
+    install_weka_url     = var.install_weka_url
     all_subnets          = join(" ", [
     for item in data.azurerm_subnet.subnets.*.address_prefix :
     split("/", item)[0]

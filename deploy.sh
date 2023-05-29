@@ -4,7 +4,19 @@ set -ex
 while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do
    sleep 2
 done
+apt update -y
 apt install net-tools -y
+
+# set apt private repo
+if [[ "${apt_repo_url}" != "" ]]; then
+  mv /etc/apt/sources.list /etc/apt/sources.list.bak
+  echo "deb ${apt_repo_url} focal main restricted universe" > /etc/apt/sources.list
+  echo "deb ${apt_repo_url} focal-updates main restricted" >> /etc/apt/sources.list
+fi
+
+while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do
+   sleep 2
+done
 
 INSTALLATION_PATH="/tmp/weka"
 mkdir -p $INSTALLATION_PATH
@@ -62,7 +74,6 @@ fi
 
 netplan apply
 
-apt update -y
 apt install -y jq
 
 # attache disk
@@ -74,8 +85,6 @@ mkdir -p /opt/weka 2>&1
 mount $wekaiosw_device /opt/weka
 
 echo "LABEL=wekaiosw /opt/weka ext4 defaults 0 2" >>/etc/fstab
-
-rm -rf $INSTALLATION_PATH
 
 
 ###########################################################################################################################################################################################################
@@ -164,10 +173,6 @@ function getNetStrForDpdk() {
 
 
 # install script
-
-TOKEN=${get_weka_io_token}
-INSTALL_URL=https://$TOKEN@get.weka.io/dist/v1/install/${weka_version}/${weka_version}
-
 # https://gist.github.com/fungusakafungus/1026804
 function retry {
   local retry_max=$1
@@ -186,11 +191,21 @@ function retry {
   return 0
 }
 
-while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do
-   sleep 2
-done
+TOKEN=${get_weka_io_token}
+INSTALL_URL=https://$TOKEN@get.weka.io/dist/v1/install/${weka_version}/${weka_version}
 
-retry 300 2 curl --fail --max-time 10 $INSTALL_URL | sh
+if [[ "${install_weka_url}" != "" ]]; then
+    wget -P $INSTALLATION_PATH ${install_weka_url}
+    IFS='/' read -ra tar_str <<< "${install_weka_url}"
+    pkg_name=$(cut -d'/' -f"$${#tar_str[@]}" <<< ${install_weka_url})
+    cd $INSTALLATION_PATH
+    tar -xvf $pkg_name
+    tar_folder=$(echo $pkg_name | sed 's/.tar//')
+    cd $INSTALLATION_PATH/$tar_folder
+    ./install.sh
+  else
+    retry 300 2 curl --fail --max-time 10 $INSTALL_URL | sh
+fi
 
 weka local stop
 weka local rm default --force
@@ -222,3 +237,6 @@ do
   ready_containers=$( weka local ps | grep -i 'running' | wc -l )
   echo "Running containers: $ready_containers"
 done
+
+
+rm -rf $INSTALLATION_PATH
