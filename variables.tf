@@ -239,3 +239,15 @@ variable "placement_group_id" {
   default     = ""
   description = "Proximity placement group to use for the vmss. If not passed, will be created automatically."
 }
+
+variable "apt_repo_url" {
+  type        = string
+  default     = ""
+  description = "The URL of the apt private repository."
+}
+
+variable "install_weka_url" {
+  type        = string
+  description = "The URL of the Weka release download tar file."
+  default     = ""
+}
