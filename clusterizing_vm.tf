@@ -37,14 +37,14 @@ resource "azurerm_virtual_machine" "clusterizing" {
   storage_os_disk {
     caching       = "ReadWrite"
     create_option = "FromImage"
-    name          = "os_disk-${var.prefix}-${var.cluster_name}-${var.cluster_size - 1}"
+    name          = "os-disk-${var.prefix}-${var.cluster_name}-${var.cluster_size - 1}"
   }
   storage_data_disk {
     lun           = 0
     caching       = "ReadWrite"
     create_option = "Empty"
     disk_size_gb  = local.disk_size
-    name          = "traces-${var.prefix}-${var.cluster_name}-${var.cluster_size - 1}"
+    name          = "weka-disk-${var.prefix}-${var.cluster_name}-${var.cluster_size - 1}" # will be used for /opt/weka
   }
   delete_os_disk_on_termination    = true
   delete_data_disks_on_termination = true

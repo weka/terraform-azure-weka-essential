@@ -127,14 +127,14 @@ resource "azurerm_virtual_machine" "vms" {
   storage_os_disk {
     caching       = "ReadWrite"
     create_option = "FromImage"
-    name          = "os_disk-${var.prefix}-${var.cluster_name}-${count.index}"
+    name          = "os-disk-${var.prefix}-${var.cluster_name}-${count.index}"
   }
   storage_data_disk {
     lun           = 0
     caching       = "ReadWrite"
     create_option = "Empty"
     disk_size_gb  = local.disk_size
-    name          = "traces-${var.prefix}-${var.cluster_name}-${count.index}"
+    name          = "weka-disk-${var.prefix}-${var.cluster_name}-${count.index}" # will be used for /opt/weka
   }
   delete_os_disk_on_termination    = true
   delete_data_disks_on_termination = true
