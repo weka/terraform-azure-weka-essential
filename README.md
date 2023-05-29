@@ -99,7 +99,7 @@ Names will be:
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_network"></a> [network](#module\_network) | modules/network | n/a |
+| <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
 
 ## Resources
 
