@@ -92,6 +92,13 @@ variable "linux_vm_image" {
       version   = "latest"
       ofed      = "ubuntu20.04"
     }
+    rocky = {
+      publisher = "procomputers"
+      offer     = "rocky-linux-8-gen2"
+      sku       = "rocky-linux-8-gen2"
+      version   = "8.7.20221203"
+      ofed      = "rhle8.7"
+    }
   }
 }
 

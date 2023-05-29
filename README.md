@@ -125,14 +125,14 @@ In the output you will get the cluster backends (and clients if you asked for) i
 |------|---------|
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | ~> 3.43.0 |
 | <a name="provider_local"></a> [local](#provider\_local) | n/a |
+| <a name="provider_template"></a> [template](#provider\_template) | n/a |
 | <a name="provider_tls"></a> [tls](#provider\_tls) | n/a |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_clients"></a> [clients](#module\_clients) | ./modules/clients | n/a |
-| <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
+| <a name="module_network"></a> [network](#module\_network) | modules/network | n/a |
 
 ## Resources
 
