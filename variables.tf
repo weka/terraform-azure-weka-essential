@@ -83,7 +83,7 @@ variable "linux_vm_image" {
 variable "weka_version" {
   type        = string
   description = "The Weka version to deploy."
-  default     = "4.2.0.98-beta"
+  default     = "4.2.0.126-azuredk"
 }
 
 variable "get_weka_io_token" {
