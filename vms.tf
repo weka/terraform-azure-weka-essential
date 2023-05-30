@@ -10,7 +10,6 @@ provider "azurerm" {
 module "network" {
   count           = length(var.subnets) ==0 ? 1 : 0
   source          = "./modules/network"
-  subscription_id = var.subscription_id
   prefix          = var.prefix
   rg_name         = local.vnet_rg_name
   address_space   = var.address_space

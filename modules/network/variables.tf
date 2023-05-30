@@ -1,8 +1,3 @@
-variable "subscription_id" {
-  type = string
-  description = "The subscription id for the deployment."
-}
-
 variable "prefix" {
   type = string
   description = "The prefix for all the resource names. For example, the prefix for your system name."
