@@ -1,38 +1,3 @@
-data "azurerm_storage_account" "obs" {
-  count               = var.set_obs && var.blob_obs_access_key == "" ? 1 : 0
-  name                = local.obs_name
-  resource_group_name = var.rg_name
-  depends_on          = [module.obs]
-}
-
-locals {
-  alphanumeric_cluster_name = lower(replace(var.cluster_name, "/\\W|_|\\s/", ""))
-  alphanumeric_prefix_name  = lower(replace(var.prefix, "/\\W|_|\\s/", ""))
-  obs_name                  = var.obs_name != "" ? var.obs_name : "${local.alphanumeric_prefix_name}${local.alphanumeric_cluster_name}obs"
-  obs_container_name        = var.obs_container_name != "" ? var.obs_container_name : "${local.alphanumeric_prefix_name}-${local.alphanumeric_cluster_name}-obs"
-  blob_obs_access_key       = var.set_obs && var.blob_obs_access_key == "" ? data.azurerm_storage_account.obs[0].primary_access_key : var.blob_obs_access_key
-}
-
-module "dns" {
-  count      = var.set_obs && var.private_dns_zone_id == "" ? 1 : 0
-  source     = "./modules/dns"
-  prefix     = var.prefix
-  rg_name    = local.vnet_rg_name
-  vnet_name  = local.vnet_name
-  depends_on = [module.network]
-}
-
-module "obs" {
-  count               = var.set_obs && var.obs_name == "" ? 1 : 0
-  source              = "./modules/obs"
-  rg_name             = var.rg_name
-  subnet_id           = data.azurerm_subnet.subnets[0].id
-  private_dns_zone_id = module.dns[0].private_dns_zone_id
-  obs_name            = local.obs_name
-  obs_container_name  = local.obs_container_name
-  depends_on          = [module.dns]
-}
-
 data "template_file" "clusterize" {
   template = file("${path.module}/clusterize.sh")
   vars     = {
@@ -47,9 +12,9 @@ data "template_file" "clusterize" {
     install_cluster_dpdk = var.install_cluster_dpdk
     set_obs              = var.set_obs
     tiering_ssd_percent  = var.tiering_ssd_percent
-    obs_name             = local.obs_name
-    obs_container_name   = local.obs_container_name
-    blob_obs_access_key  = local.blob_obs_access_key
+    obs_name             = var.obs_name
+    obs_container_name   = var.obs_container_name
+    blob_obs_access_key  = var.blob_obs_access_key
   }
   depends_on = [azurerm_virtual_machine.vms]
 }
