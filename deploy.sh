@@ -1,9 +1,12 @@
 #!/bin/bash
 set -ex
 
+systemctl stop unattended-upgrades
+systemctl disable unattended-upgrades
 while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do
    sleep 2
 done
+
 apt update -y
 apt install net-tools -y
 
@@ -13,10 +16,6 @@ if [[ "${apt_repo_url}" != "" ]]; then
   echo "deb ${apt_repo_url} focal main restricted universe" > /etc/apt/sources.list
   echo "deb ${apt_repo_url} focal-updates main restricted" >> /etc/apt/sources.list
 fi
-
-while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do
-   sleep 2
-done
 
 INSTALLATION_PATH="/tmp/weka"
 mkdir -p $INSTALLATION_PATH
