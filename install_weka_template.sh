@@ -1,10 +1,9 @@
 #!/bin/bash
 set -ex
 
-# TODO: fix "lock" issue properly
 systemctl stop unattended-upgrades
 systemctl disable unattended-upgrades
-while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do
+while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/{lock,lock-frontend} >/dev/null 2>&1; do
    sleep 2
 done
 
