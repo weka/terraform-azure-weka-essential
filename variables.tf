@@ -286,9 +286,3 @@ variable "tiering_ssd_percent" {
   default     = 20
   description = "When set_obs_integration is true, this variable sets the capacity percentage of the filesystem that resides on SSD. For example, for an SSD with a total capacity of 20GB, and the tiering_ssd_percent is set to 20, the total available capacity is 100GB."
 }
-
-variable "private_dns_zone_id" {
-  type        = string
-  description = "Private dns zone id."
-  default     = ""
-}
