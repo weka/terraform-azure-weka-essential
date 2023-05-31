@@ -55,8 +55,8 @@ locals {
   disk_size             = var.default_disk_size + var.traces_per_ionode * (var.container_number_map[var.instance_type].compute + var.container_number_map[var.instance_type].drive + var.container_number_map[var.instance_type].frontend)
   subnet_range          = data.azurerm_subnet.subnets[0].address_prefix
   nics_numbers          = var.install_cluster_dpdk ? var.container_number_map[var.instance_type].nics : 1
-  first_nic_ids         = var.private_network ? azurerm_network_interface.private_first_nic.*.id : azurerm_network_interface.public_first_nic.*.id
-  first_nic_private_ips = var.private_network ? azurerm_network_interface.private_first_nic.*.private_ip_address : azurerm_network_interface.public_first_nic.*.private_ip_address
+  first_nic_ids         = var.assign_public_ip ?  azurerm_network_interface.public_first_nic.*.id : azurerm_network_interface.private_first_nic.*.id
+  first_nic_private_ips = var.assign_public_ip ? azurerm_network_interface.public_first_nic.*.private_ip_address : azurerm_network_interface.private_first_nic.*.private_ip_address
   vms_computer_names    = [for i in range(var.cluster_size - 1) : "${var.prefix}-${var.cluster_name}-backend-${i}"]
   vnet_rg_name          = var.vnet_rg_name != "" ? var.vnet_rg_name : var.rg_name
   vnet_name             = var.vnet_name != "" ? var.vnet_name : module.network[0].vnet_name
