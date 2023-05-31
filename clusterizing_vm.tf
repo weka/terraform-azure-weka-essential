@@ -27,7 +27,7 @@ resource "azurerm_virtual_machine" "clusterizing" {
   os_profile {
     admin_username = var.vm_username
     computer_name  = "${var.prefix}-${var.cluster_name}-backend-${var.cluster_size - 1}"
-    custom_data    = base64encode(format("%s\n%s\n%s\n%s", data.template_file.attach_disk.rendered, data.template_file.install_weka.rendered, data.template_file.deploy.rendered, data.template_file.clusterize.rendered))
+    custom_data    = base64encode(join("\n", [data.template_file.preparation.rendered, data.template_file.attach_disk.rendered, data.template_file.install_weka.rendered, data.template_file.deploy.rendered, data.template_file.clusterize.rendered]))
   }
   proximity_placement_group_id = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
   tags = merge(var.tags_map, {
