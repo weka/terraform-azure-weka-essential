@@ -81,7 +81,19 @@ Names will be:
 /tmp/${prefix}-${cluster_name}-public-key.pub
 /tmp/${prefix}-${cluster_name}-private-key.pem
 ```
-
+## OBS
+We support tiering to blob container.
+In order to setup tiering, you must supply the following variables:
+```hcl
+set_obs = true
+obs_name = "..."
+obs_container_name = "..."
+blob_obs_access_key = "..."
+```
+In addition, you can supply (and override our default):
+```hcl
+tiering_ssd_percent = VALUE
+```
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
