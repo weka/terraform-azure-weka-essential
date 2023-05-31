@@ -2,7 +2,6 @@
 Essential weka deployment.
 <br>Creates vms and proximity placement group. Proximity placement group id can be passed and then it will not be created.
 <br>The deployment can use existing network or create vnet/subnets/security groups.
-- This deployment assumes that the vms will have outbound internet access.
 - This deployment was created for essential weka deployment with minimum permissions.
 - This deployment doesn't support auto-scaling.
 - If you wish to review our full solution you can find it [here](https://github.com/weka/terraform-azure-weka)
@@ -60,11 +59,16 @@ cluster_size        = 6
 ```
 
 ### Private network deployment:
-You can pass
+#### To avoid public ip assignment:
 ```hcl
-private_network   = true
+assign_public_ip   = false
 ``` 
-This param will make the deployment skip public ip creation for our vms.
+#### Vms with no internet outbound:
+In case your vms don't have internet access, you should supply weka tar file url and apt repo url:
+```hcl
+apt_repo_url = "..."
+install_weka_url = "..."
+```
 ## Ssh keys
 The username for ssh into vms is `weka`.
 We allow passing exising public key string:

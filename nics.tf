@@ -1,5 +1,5 @@
 resource "azurerm_public_ip" "publicIp" {
-  count                         = var.private_network ? 0 : var.cluster_size
+  count               = var.assign_public_ip ? var.cluster_size : 0
   name                = "publicIp-${var.prefix}-${var.cluster_name}-${count.index}"
   resource_group_name = var.rg_name
   location            = data.azurerm_resource_group.rg.location
@@ -7,7 +7,7 @@ resource "azurerm_public_ip" "publicIp" {
 }
 
 resource "azurerm_network_interface" "public_first_nic" {
-  count                         = var.private_network ? 0 : var.cluster_size
+  count                         = var.assign_public_ip ? var.cluster_size : 0
   name                          = "${var.prefix}-${var.cluster_name}-backend-nic-${count.index}"
   enable_accelerated_networking = var.install_cluster_dpdk
   resource_group_name           = var.rg_name
@@ -16,13 +16,13 @@ resource "azurerm_network_interface" "public_first_nic" {
     name                          = "ipconfig0"
     subnet_id                     = data.azurerm_subnet.subnets[0].id
     private_ip_address_allocation = "Dynamic"
-    primary = true
-    public_ip_address_id = azurerm_public_ip.publicIp[count.index].id
+    primary                       = true
+    public_ip_address_id          = azurerm_public_ip.publicIp[count.index].id
   }
 }
 
 resource "azurerm_network_interface" "private_first_nic" {
-  count                         = var.private_network ? var.cluster_size : 0
+  count                         = var.assign_public_ip ? 0 : var.cluster_size
   name                          = "${var.prefix}-${var.cluster_name}-backend-nic-${count.index}"
   enable_accelerated_networking = var.install_cluster_dpdk
   resource_group_name           = var.rg_name
@@ -31,7 +31,7 @@ resource "azurerm_network_interface" "private_first_nic" {
     name                          = "ipconfig0"
     subnet_id                     = data.azurerm_subnet.subnets[0].id
     private_ip_address_allocation = "Dynamic"
-    primary = true
+    primary                       = true
   }
 }
 
