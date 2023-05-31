@@ -9,16 +9,22 @@ data "azurerm_subnet" "subnets" {
   name                 = var.subnets_name[count.index]
 }
 
-data "template_file" "install_weka" {
-  template = file(var.install_weka_template_path)
+data "template_file" "preparation" {
+  template = var.preparation_template
   vars = {
-    apt_repo_url      = var.apt_repo_url
-    install_ofed      = var.custom_image_id == null ? var.install_ofed : false
-    ofed_version      = var.ofed_version
-    install_ofed_url  = var.install_ofed_url
-    nics_num          = var.nics
-    install_dpdk      = var.install_dpdk
-    subnet_range      = data.azurerm_subnet.subnets[0].address_prefix
+    apt_repo_url     = var.apt_repo_url
+    install_ofed     = var.custom_image_id == null ? var.install_ofed : false
+    ofed_version     = var.ofed_version
+    install_ofed_url = var.install_ofed_url
+    nics_num         = var.nics
+    install_dpdk     = var.install_dpdk
+    subnet_range     = data.azurerm_subnet.subnets[0].address_prefix
+  }
+}
+
+data "template_file" "install_weka" {
+  template = var.install_weka_template
+  vars = {
     get_weka_io_token = var.get_weka_io_token
     weka_version      = var.weka_version
     install_weka_url  = var.install_weka_url
@@ -102,8 +108,9 @@ resource "azurerm_network_interface" "client_nic" {
 }
 
 locals {
-  primary_nic_ids = var.assign_public_ip ? azurerm_network_interface.primary_client_nic_public.*.id : azurerm_network_interface.primary_client_nic_private.*.id
-  vms_custom_data = base64encode(format("%s\n%s", data.template_file.install_weka.rendered, data.template_file.mount_wekafs.rendered))
+  primary_nic_ids   = var.assign_public_ip ? azurerm_network_interface.primary_client_nic_public.*.id : azurerm_network_interface.primary_client_nic_private.*.id
+  custom_data_parts = [data.template_file.preparation.rendered, data.template_file.install_weka.rendered, data.template_file.mount_wekafs.rendered]
+  vms_custom_data   = base64encode(join("\n", local.custom_data_parts))
 }
 
 resource "azurerm_linux_virtual_machine" "default_image_vms" {

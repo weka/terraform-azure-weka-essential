@@ -1,7 +1,3 @@
-#!/bin/bash
-set -ex
-
-# attache disk
 wekaiosw_device=/dev/"$(lsblk | grep ${disk_size}G | awk '{print $1}')"
 
 status=0
