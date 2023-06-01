@@ -42,7 +42,7 @@ module "clients" {
   assign_public_ip           = var.assign_public_ip
   # custom_image_id            = "/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a/resourceGroups/weka-tf/providers/Microsoft.Compute/images/weka-custome-image-ofed-5.6-image"
 
-  depends_on = [azurerm_virtual_machine.clusterizing, module.network]
+  depends_on = [azurerm_linux_virtual_machine.clusterizing, module.network]
 }
 
 data "azurerm_resource_group" "rg" {
@@ -90,8 +90,8 @@ locals {
   vnet_rg_name          = var.vnet_rg_name != "" ? var.vnet_rg_name : var.rg_name
   vnet_name             = var.vnet_name != "" ? var.vnet_name : module.network[0].vnet_name
   all_subnets_str       = join(" ", [
-  for item in data.azurerm_subnet.subnets.*.address_prefix :
-  split("/", item)[0]
+    for item in data.azurerm_subnet.subnets.*.address_prefix :
+    split("/", item)[0]
   ])
 
   preparation_script_path  = "${path.module}/preparation.sh"
@@ -105,6 +105,7 @@ locals {
     nics_num         = local.nics_numbers
     install_dpdk     = var.install_cluster_dpdk
     subnet_range     = local.subnet_range
+    ofed_type        = var.linux_vm_image[var.os_type].ofed
   })
 
   attach_disk_script = templatefile("${path.module}/attach_disk.sh", {
@@ -153,69 +154,69 @@ resource "azurerm_proximity_placement_group" "ppg" {
   }
 }
 
-resource "azurerm_virtual_machine" "vms" {
-  count               = var.cluster_size - 1
-  name                = "${var.prefix}-${var.cluster_name}-${count.index}"
-  location            = data.azurerm_resource_group.rg.location
-  resource_group_name = var.rg_name
-  vm_size             = var.instance_type
-  os_profile {
-    admin_username = var.vm_username
-    computer_name  = local.vms_computer_names[
-    count.index
-    ]
-    custom_data = base64encode(local.custom_data)
-  }
+resource "azurerm_linux_virtual_machine" "vms" {
+  count                        = var.cluster_size - 1
+  name                         = "${var.prefix}-${var.cluster_name}-${count.index}"
+  location                     = data.azurerm_resource_group.rg.location
+  resource_group_name          = var.rg_name
+  size                         = var.instance_type
+  admin_username               = var.vm_username
+  computer_name                = local.vms_computer_names[count.index]
+  custom_data                  = base64encode(local.custom_data)
   proximity_placement_group_id = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
-  tags                         = merge(var.tags_map, {
-    "weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id
-  })
-  storage_image_reference {
-    offer     = lookup(var.linux_vm_image, "offer", null)
-    publisher = lookup(var.linux_vm_image, "publisher", null)
-    sku       = lookup(var.linux_vm_image, "sku", null)
-    version   = lookup(var.linux_vm_image, "version", null)
+  network_interface_ids        = concat([local.first_nic_ids[count.index]], slice(azurerm_network_interface.private_nics.*.id, ( local.nics_numbers - 1 )* count.index, (local.nics_numbers - 1) * (count.index + 1)))
+  disable_password_authentication = true
+  tags                            = merge(var.tags_map, {"weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id })
+  source_image_reference {
+    offer     = var.linux_vm_image[var.os_type].offer
+    publisher = var.linux_vm_image[var.os_type].publisher
+    sku       = var.linux_vm_image[var.os_type].sku
+    version   = var.linux_vm_image[var.os_type].version
   }
-
-  storage_os_disk {
-    caching       = "ReadWrite"
-    create_option = "FromImage"
-    name          = "os-disk-${var.prefix}-${var.cluster_name}-${count.index}"
-  }
-  storage_data_disk {
-    lun           = 0
-    caching       = "ReadWrite"
-    create_option = "Empty"
-    disk_size_gb  = local.disk_size
-    name          = "weka-disk-${var.prefix}-${var.cluster_name}-${count.index}" # will be used for /opt/weka
-  }
-  delete_os_disk_on_termination    = true
-  delete_data_disks_on_termination = true
-
-  os_profile_linux_config {
-    ssh_keys {
-      key_data = local.public_ssh_key
-      path     = "/home/weka/.ssh/authorized_keys"
+  dynamic "plan" {
+    for_each = var.os_type != "ubuntu" ? [1] : []
+    content {
+      name      = var.linux_vm_image[var.os_type].sku
+      product   = var.linux_vm_image[var.os_type].offer
+      publisher = var.linux_vm_image[var.os_type].publisher
     }
-    disable_password_authentication = true
   }
 
+  os_disk {
+    caching              = "ReadWrite"
+    name                 = "os-disk-${var.prefix}-${var.cluster_name}-${count.index}"
+    storage_account_type = "Standard_LRS"
+  }
 
+  admin_ssh_key {
+    public_key = local.public_ssh_key
+    username   = var.vm_username
+  }
   identity {
     type = "SystemAssigned"
   }
 
-  primary_network_interface_id = local.first_nic_ids[count.index]
-  network_interface_ids        = concat(
-    [
-      local.first_nic_ids[
-      count.index
-      ]
-    ],
-    slice(azurerm_network_interface.private_nics.*.id, (local.nics_numbers - 1) * count.index, (local.nics_numbers - 1) * (count.index + 1))
-  )
   lifecycle {
     ignore_changes = [tags]
   }
   depends_on = [module.network, azurerm_proximity_placement_group.ppg]
+}
+
+resource "azurerm_managed_disk" "vm_disks" {
+  count                = var.cluster_size - 1
+  name                 = "weka-disk-${var.prefix}-${var.cluster_name}-${count.index}"
+  location             = data.azurerm_resource_group.rg.location
+  resource_group_name  = var.rg_name
+  storage_account_type = "Standard_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = local.disk_size
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "vm_disk_attachment" {
+  count              = var.cluster_size - 1
+  managed_disk_id    = azurerm_managed_disk.vm_disks[count.index].id
+  virtual_machine_id = azurerm_linux_virtual_machine.vms[count.index].id
+  lun                = 0
+  caching            = "ReadWrite"
+  depends_on         = [azurerm_linux_virtual_machine.vms]
 }

@@ -69,14 +69,29 @@ variable "cluster_size" {
   }
 }
 
+variable "os_type" {
+  default     = "ubuntu"
+  type        = string
+  description = "Type of os, The default is ubuntu"
+}
+
 variable "linux_vm_image" {
-  type        = map(string)
+  type        = map(object({
+    publisher = string
+    offer     = string
+    sku       = string
+    version   = string
+    ofed      = string
+  }))
   description = "The default azure vm image reference."
-  default = {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-focal"
-    sku       = "20_04-lts-gen2"
-    version   = "latest"
+  default     = {
+    ubuntu = {
+      publisher = "Canonical"
+      offer     = "0001-com-ubuntu-server-focal"
+      sku       = "20_04-lts-gen2"
+      version   = "latest"
+      ofed      = "ubuntu20.04"
+    }
   }
 }
 
