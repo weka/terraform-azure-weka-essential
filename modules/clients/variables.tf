@@ -99,14 +99,14 @@ variable "install_weka_url" {
   default     = ""
 }
 
-variable "preparation_template" {
+variable "preparation_template_file" {
   type        = string
-  description = "preparation_template file contents"
+  description = "preparation_template file path"
 }
 
-variable "install_weka_template" {
+variable "install_weka_template_file" {
   type        = string
-  description = "install_weka_template file contents"
+  description = "install_weka_template file path"
 }
 
 variable "install_dpdk" {

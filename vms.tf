@@ -17,29 +17,29 @@ module "network" {
 }
 
 module "clients" {
-  count                 = var.clients_number > 0 ? 1 : 0
-  source                = "./modules/clients"
-  rg_name               = var.rg_name
-  clients_name          = "${var.prefix}-${var.cluster_name}-client"
-  clients_number        = var.clients_number
-  install_ofed          = var.install_ofed
-  install_ofed_url      = var.install_ofed_url
-  ofed_version          = var.ofed_version
-  apt_repo_url          = var.apt_repo_url
-  install_weka_url      = var.install_weka_url
-  install_dpdk          = var.install_cluster_dpdk
-  preparation_template  = data.template_file.preparation.template
-  install_weka_template = data.template_file.install_weka.template
-  subnets_name          = data.azurerm_subnet.subnets.*.name
-  vnet_name             = local.vnet_name
-  nics                  = var.client_nics_num
-  instance_type         = var.client_instance_type
-  backend_ip            = local.first_nic_private_ips[0]
-  get_weka_io_token     = var.get_weka_io_token
-  weka_version          = var.weka_version
-  ssh_public_key        = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
-  ppg_id                = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
-  assign_public_ip      = var.assign_public_ip
+  count                      = var.clients_number > 0 ? 1 : 0
+  source                     = "./modules/clients"
+  rg_name                    = var.rg_name
+  clients_name               = "${var.prefix}-${var.cluster_name}-client"
+  clients_number             = var.clients_number
+  install_ofed               = var.install_ofed
+  install_ofed_url           = var.install_ofed_url
+  ofed_version               = var.ofed_version
+  apt_repo_url               = var.apt_repo_url
+  install_weka_url           = var.install_weka_url
+  install_dpdk               = var.install_cluster_dpdk
+  preparation_template_file  = local.preparation_script_path
+  install_weka_template_file = local.install_weka_script_path
+  subnets_name               = data.azurerm_subnet.subnets.*.name
+  vnet_name                  = local.vnet_name
+  nics                       = var.client_nics_num
+  instance_type              = var.client_instance_type
+  backend_ip                 = local.first_nic_private_ips[0]
+  get_weka_io_token          = var.get_weka_io_token
+  weka_version               = var.weka_version
+  ssh_public_key             = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
+  ppg_id                     = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
+  assign_public_ip           = var.assign_public_ip
   # custom_image_id            = "/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a/resourceGroups/weka-tf/providers/Microsoft.Compute/images/weka-custome-image-ofed-5.6-image"
 
   depends_on = [azurerm_virtual_machine.clusterizing, module.network]
@@ -89,17 +89,15 @@ locals {
   vms_computer_names    = [for i in range(var.cluster_size - 1) : "${var.prefix}-${var.cluster_name}-backend-${i}"]
   vnet_rg_name          = var.vnet_rg_name != "" ? var.vnet_rg_name : var.rg_name
   vnet_name             = var.vnet_name != "" ? var.vnet_name : module.network[0].vnet_name
-  all_subnets_str = join(" ", [
-    for item in data.azurerm_subnet.subnets.*.address_prefix :
-    split("/", item)[0]
+  all_subnets_str       = join(" ", [
+  for item in data.azurerm_subnet.subnets.*.address_prefix :
+  split("/", item)[0]
   ])
-  custom_data_parts = [data.template_file.preparation.rendered, data.template_file.attach_disk.rendered, data.template_file.install_weka.rendered, data.template_file.deploy.rendered]
-  custom_data       = join("\n", local.custom_data_parts)
-}
 
-data "template_file" "preparation" {
-  template = file("${path.module}/preparation.sh")
-  vars = {
+  preparation_script_path  = "${path.module}/preparation.sh"
+  install_weka_script_path = "${path.module}/install_weka_template.sh"
+
+  preparation_script = templatefile(local.preparation_script_path, {
     apt_repo_url     = var.apt_repo_url
     install_ofed     = var.install_ofed
     ofed_version     = var.ofed_version
@@ -107,37 +105,41 @@ data "template_file" "preparation" {
     nics_num         = local.nics_numbers
     install_dpdk     = var.install_cluster_dpdk
     subnet_range     = local.subnet_range
-  }
-}
+  })
 
-data "template_file" "attach_disk" {
-  template = file("${path.module}/attach_disk.sh")
-  vars = {
+  attach_disk_script = templatefile("${path.module}/attach_disk.sh", {
     disk_size = local.disk_size
-  }
-}
+  })
 
-data "template_file" "install_weka" {
-  template = file("${path.module}/install_weka_template.sh")
-  vars = {
-    get_weka_io_token = var.get_weka_io_token
-    weka_version      = var.weka_version
-    install_weka_url  = var.install_weka_url
-  }
-}
+  install_weka_script = templatefile(local.install_weka_script_path,
+    {
+      get_weka_io_token = var.get_weka_io_token
+      weka_version      = var.weka_version
+      install_weka_url  = var.install_weka_url
+    } )
 
-data "template_file" "deploy" {
-  template = file("${path.module}/deploy.sh")
-  vars = {
-    memory          = var.container_number_map[var.instance_type].memory
-    compute_num     = var.container_number_map[var.instance_type].compute
-    frontend_num    = var.container_number_map[var.instance_type].frontend
-    drive_num       = var.container_number_map[var.instance_type].drive
+  deploy_script = templatefile("${path.module}/deploy.sh", {
+    memory      = var.container_number_map[var.instance_type].memory
+    compute_num = var.container_number_map[
+    var.instance_type
+    ].compute
+    frontend_num = var.container_number_map[
+    var.instance_type
+    ].frontend
+    drive_num = var.container_number_map[
+    var.instance_type
+    ].drive
     nics_num        = local.nics_numbers
     install_dpdk    = var.install_cluster_dpdk
     all_subnets     = local.all_subnets_str
     subnet_prefixes = join(" ", [for item in data.azurerm_subnet.subnets.*.address_prefix : item])
-  }
+  })
+
+  custom_data_parts = [
+    local.preparation_script, local.attach_disk_script,
+    local.install_weka_script, local.deploy_script
+  ]
+  custom_data = join("\n", local.custom_data_parts)
 }
 
 resource "azurerm_proximity_placement_group" "ppg" {
@@ -159,11 +161,13 @@ resource "azurerm_virtual_machine" "vms" {
   vm_size             = var.instance_type
   os_profile {
     admin_username = var.vm_username
-    computer_name  = local.vms_computer_names[count.index]
-    custom_data    = base64encode(local.custom_data)
+    computer_name  = local.vms_computer_names[
+    count.index
+    ]
+    custom_data = base64encode(local.custom_data)
   }
   proximity_placement_group_id = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
-  tags = merge(var.tags_map, {
+  tags                         = merge(var.tags_map, {
     "weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id
   })
   storage_image_reference {
@@ -202,8 +206,12 @@ resource "azurerm_virtual_machine" "vms" {
   }
 
   primary_network_interface_id = local.first_nic_ids[count.index]
-  network_interface_ids = concat(
-    [local.first_nic_ids[count.index]],
+  network_interface_ids        = concat(
+    [
+      local.first_nic_ids[
+      count.index
+      ]
+    ],
     slice(azurerm_network_interface.private_nics.*.id, (local.nics_numbers - 1) * count.index, (local.nics_numbers - 1) * (count.index + 1))
   )
   lifecycle {
