@@ -9,43 +9,6 @@ data "azurerm_subnet" "subnets" {
   name                 = var.subnets_name[count.index]
 }
 
-data "template_file" "preparation" {
-  template = var.preparation_template
-  vars = {
-    apt_repo_url     = var.apt_repo_url
-    install_ofed     = var.custom_image_id == null ? var.install_ofed : false
-    ofed_version     = var.ofed_version
-    install_ofed_url = var.install_ofed_url
-    nics_num         = var.nics
-    install_dpdk     = var.install_dpdk
-    subnet_range     = data.azurerm_subnet.subnets[0].address_prefix
-  }
-}
-
-data "template_file" "install_weka" {
-  template = var.install_weka_template
-  vars = {
-    get_weka_io_token = var.get_weka_io_token
-    weka_version      = var.weka_version
-    install_weka_url  = var.install_weka_url
-  }
-}
-
-data "template_file" "mount_wekafs" {
-  template = file("${path.module}/mount_wekafs.sh")
-  vars = {
-    all_subnets = join(" ", [
-      for item in data.azurerm_subnet.subnets.*.address_prefix : split("/", item)[0]
-    ])
-    all_gateways = join(" ", [
-      for item in data.azurerm_subnet.subnets.*.address_prefix : cidrhost(item, 1)
-    ])
-    nics_num     = var.nics
-    backend_ip   = var.backend_ip
-    install_dpdk = var.install_dpdk
-  }
-}
-
 resource "azurerm_public_ip" "public_ip" {
   count               = var.assign_public_ip ? var.clients_number : 0
   name                = "${var.clients_name}-public-ip-${count.index}"
@@ -108,9 +71,42 @@ resource "azurerm_network_interface" "client_nic" {
 }
 
 locals {
+  preparation_script = templatefile(    var.preparation_template_file, {
+    apt_repo_url     = var.apt_repo_url
+    install_ofed     = var.custom_image_id == null ? var.install_ofed : false
+    ofed_version     = var.ofed_version
+    install_ofed_url = var.install_ofed_url
+    nics_num         = var.nics
+    install_dpdk     = var.install_dpdk
+    subnet_range     = data.azurerm_subnet.subnets[0].address_prefix
+  })
+
+  install_weka_script = templatefile(var.install_weka_template_file,
+    {
+      get_weka_io_token = var.get_weka_io_token
+      weka_version      = var.weka_version
+      install_weka_url  = var.install_weka_url
+    })
+
+  mount_wekafs_script = templatefile("${path.module}/mount_wekafs.sh", {
+    all_subnets = join(" ", [
+    for item in data.azurerm_subnet.subnets.*.address_prefix : split("/", item)[0]
+    ])
+    all_gateways = join(" ", [
+    for item in data.azurerm_subnet.subnets.*.address_prefix : cidrhost(item, 1)
+    ])
+    nics_num     = var.nics
+    backend_ip   = var.backend_ip
+    install_dpdk = var.install_dpdk
+  })
+
+
   primary_nic_ids   = var.assign_public_ip ? azurerm_network_interface.primary_client_nic_public.*.id : azurerm_network_interface.primary_client_nic_private.*.id
-  custom_data_parts = [data.template_file.preparation.rendered, data.template_file.install_weka.rendered, data.template_file.mount_wekafs.rendered]
-  vms_custom_data   = base64encode(join("\n", local.custom_data_parts))
+  custom_data_parts = [
+    local.preparation_script, local.install_weka_script,
+    local.mount_wekafs_script
+  ]
+  vms_custom_data = base64encode(join("\n", local.custom_data_parts))
 }
 
 resource "azurerm_linux_virtual_machine" "default_image_vms" {

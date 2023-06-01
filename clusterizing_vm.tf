@@ -1,6 +1,5 @@
-data "template_file" "clusterize" {
-  template = file("${path.module}/clusterize.sh")
-  vars = {
+locals {
+  clusterize_script = templatefile("${path.module}/clusterize.sh", {
     vm_names            = join(" ", local.vms_computer_names)
     private_ips         = join(" ", slice(local.first_nic_private_ips, 0, var.cluster_size - 1))
     cluster_name        = var.cluster_name
@@ -15,8 +14,7 @@ data "template_file" "clusterize" {
     obs_name            = var.obs_name
     obs_container_name  = var.obs_container_name
     blob_obs_access_key = var.blob_obs_access_key
-  }
-  depends_on = [azurerm_virtual_machine.vms]
+  })
 }
 
 resource "azurerm_virtual_machine" "clusterizing" {
@@ -27,10 +25,13 @@ resource "azurerm_virtual_machine" "clusterizing" {
   os_profile {
     admin_username = var.vm_username
     computer_name  = "${var.prefix}-${var.cluster_name}-backend-${var.cluster_size - 1}"
-    custom_data    = base64encode(join("\n", [data.template_file.preparation.rendered, data.template_file.attach_disk.rendered, data.template_file.install_weka.rendered, data.template_file.deploy.rendered, data.template_file.clusterize.rendered]))
+    custom_data    = base64encode(join("\n", [
+      local.preparation_script, local.attach_disk_script,
+      local.install_weka_script, local.deploy_script, local.clusterize_script
+    ]))
   }
   proximity_placement_group_id = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
-  tags = merge(var.tags_map, {
+  tags                         = merge(var.tags_map, {
     "weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id
   })
   storage_image_reference {
@@ -67,7 +68,7 @@ resource "azurerm_virtual_machine" "clusterizing" {
   }
 
   primary_network_interface_id = local.first_nic_ids[var.cluster_size - 1]
-  network_interface_ids = concat(
+  network_interface_ids        = concat(
     [local.first_nic_ids[var.cluster_size - 1]],
     slice(azurerm_network_interface.private_nics.*.id, (local.nics_numbers - 1) * (var.cluster_size - 1), (local.nics_numbers - 1) * var.cluster_size)
   )
