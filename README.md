@@ -133,6 +133,7 @@ tiering_ssd_percent = VALUE
 | [local_file.public_key](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file) | resource |
 | [tls_private_key.ssh_key](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
+| [azurerm_public_ip.public_ips](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/public_ip) | data source |
 | [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) | data source |
 | [azurerm_subnet.subnets](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
 | [template_file.attach_disk](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file) | data source |
@@ -189,6 +190,6 @@ tiering_ssd_percent = VALUE
 
 | Name | Description |
 |------|-------------|
-| <a name="output_client_ips"></a> [client\_ips](#output\_client\_ips) | n/a |
-| <a name="output_vms_private_ips"></a> [vms\_private\_ips](#output\_vms\_private\_ips) | n/a |
+| <a name="output_backends_ips"></a> [backends\_ips](#output\_backends\_ips) | Weka backends ips. If 'assign\_public\_ip' is set to true, it will output public ips, otherwise private ips |
+| <a name="output_client_ips"></a> [client\_ips](#output\_client\_ips) | Weka clients ips. If 'assign\_public\_ip' is set to true, it will output public ips, otherwise private ips |
 <!-- END_TF_DOCS -->
