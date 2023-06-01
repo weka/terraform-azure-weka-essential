@@ -75,10 +75,10 @@ function retry {
 TOKEN=${get_weka_io_token}
 INSTALL_URL=https://$TOKEN@get.weka.io/dist/v1/install/${weka_version}/${weka_version}
 
-if [[ "${install_weka_url}" != "" ]]; then
-    wget -P $INSTALLATION_PATH ${install_weka_url}
-    IFS='/' read -ra tar_str <<< "${install_weka_url}"
-    pkg_name=$(cut -d'/' -f"$${#tar_str[@]}" <<< ${install_weka_url})
+if [[ "${install_weka_url}" ]]; then
+    wget -P $INSTALLATION_PATH "${install_weka_url}"
+    IFS='/' read -ra tar_str <<< "\"${install_weka_url}\""
+    pkg_name=$(cut -d'/' -f"$${#tar_str[@]}" <<< "${install_weka_url}")
     cd $INSTALLATION_PATH
     tar -xvf $pkg_name
     tar_folder=$(echo $pkg_name | sed 's/.tar//')
