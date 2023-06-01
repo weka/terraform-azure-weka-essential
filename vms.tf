@@ -211,11 +211,3 @@ resource "azurerm_virtual_machine" "vms" {
   }
   depends_on = [module.network, azurerm_proximity_placement_group.ppg]
 }
-
-output "vms_private_ips" {
-  value = local.first_nic_private_ips
-}
-
-output "client_ips" {
-  value = length(module.clients) > 0 ? module.clients.0.client-ips : null
-}
