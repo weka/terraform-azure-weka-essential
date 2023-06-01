@@ -7,7 +7,7 @@ data "azurerm_public_ip" "public_ips" {
   count               = var.assign_public_ip ? var.cluster_size : 0
   name                = azurerm_public_ip.publicIp[count.index].name
   resource_group_name = var.rg_name
-  depends_on = [azurerm_virtual_machine.vms, azurerm_virtual_machine.clusterizing]
+  depends_on          = [azurerm_linux_virtual_machine.vms,azurerm_linux_virtual_machine.clusterizing]
 }
 
 output "backends_ips" {
