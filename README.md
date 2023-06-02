@@ -94,6 +94,23 @@ In addition, you can supply (and override our default):
 ```hcl
 tiering_ssd_percent = VALUE
 ```
+## Clients
+We support creating clients that will be mounted automatically to the cluster.
+<br>In order to create clients you need to provide the number of clients you want (by default the number is 0),
+for example:
+```hcl
+clients_number = 2
+```
+This will automatically create 2 clients.
+<br>In addition you can supply these optional variables:
+```hcl
+client_instance_type = "..."
+client_nics_num = DESIRED_NUM
+```
+## Terraform output
+In the output you will get the cluster backends (and clients if you asked for) ips.
+<br>If `assign_public_ip` is set to `true` you will get a list of public ips, otherwise a list of private ips.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
