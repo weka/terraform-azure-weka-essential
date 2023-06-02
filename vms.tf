@@ -1,12 +1,5 @@
 data "azurerm_client_config" "current" {}
 
-provider "azurerm" {
-  subscription_id = var.subscription_id
-  partner_id      = "f13589d1-f10d-4c3b-ae42-3b1a8337eaf1"
-  features {
-  }
-}
-
 module "network" {
   count           = length(var.subnets) == 0 ? 1 : 0
   source          = "./modules/network"
