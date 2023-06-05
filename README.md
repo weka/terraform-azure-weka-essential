@@ -107,6 +107,11 @@ This will automatically create 2 clients.
 client_instance_type = "..."
 client_nics_num = DESIRED_NUM
 ```
+### Mounting clients in udp mode
+In order to mount clients in udp mode you should pass the following param (in addition to the above):
+```hcl
+mount_clients_dpdk = false
+```
 ## Terraform output
 In the output you will get the cluster backends (and clients if you asked for) ips.
 <br>If `assign_public_ip` is set to `true` you will get a list of public ips, otherwise a list of private ips.

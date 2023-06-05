@@ -12,7 +12,7 @@ NICS_NUM="${nics_num}"
 eth0=$(ifconfig | grep eth0 -C2 | grep 'inet ' | awk '{print $2}')
 
 mount_command="mount -t wekafs -o net=udp ${backend_ip}/$FILESYSTEM_NAME $MOUNT_POINT"
-if [[ ${install_dpdk} == true ]]; then
+if [[ ${mount_clients_dpdk} == true ]]; then
   getNetStrForDpdk $(($NICS_NUM-1)) $(($NICS_NUM)) "$gateways" "$subnets" "-o net="
   mount_command="mount -t wekafs $net -o num_cores=1 -o mgmt_ip=$eth0 ${backend_ip}/$FILESYSTEM_NAME $MOUNT_POINT"
 fi
@@ -22,7 +22,7 @@ cat <<'EOF' > retry_mount.sh
 
 mount_command=$1
 retry_count=0
-max_retries=5
+max_retries=60
 retry_interval=30
 
 while true; do
