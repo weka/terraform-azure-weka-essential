@@ -319,3 +319,15 @@ variable "client_nics_num" {
   description = "The client NICs number."
   default     = 2
 }
+
+variable "mount_clients_dpdk" {
+  type        = bool
+  default     = true
+  description = "Mount weka clients in DPDK mode"
+}
+
+variable "clients_install_ofed" {
+  type        = bool
+  default     = true
+  description = "Install ofed for weka clients with dpdk configuration"
+}

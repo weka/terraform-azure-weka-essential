@@ -23,6 +23,7 @@ variable "linux_vm_image" {
     offer     = "0001-com-ubuntu-server-focal"
     sku       = "20_04-lts-gen2"
     version   = "latest"
+    ofed      = "ubuntu20.04"
   }
 }
 
@@ -109,7 +110,7 @@ variable "install_weka_template_file" {
   description = "install_weka_template file path"
 }
 
-variable "install_dpdk" {
+variable "mount_clients_dpdk" {
   type        = bool
   default     = true
   description = "Install weka cluster with DPDK"
