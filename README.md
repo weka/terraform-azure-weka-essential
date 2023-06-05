@@ -172,6 +172,7 @@ In the output you will get the cluster backends (and clients if you asked for) i
 | <a name="input_blob_obs_access_key"></a> [blob\_obs\_access\_key](#input\_blob\_obs\_access\_key) | The access key of the existing Blob object store container. | `string` | `""` | no |
 | <a name="input_client_instance_type"></a> [client\_instance\_type](#input\_client\_instance\_type) | The client virtual machine type (sku) to deploy. | `string` | `"Standard_D4_v4"` | no |
 | <a name="input_client_nics_num"></a> [client\_nics\_num](#input\_client\_nics\_num) | The client NICs number. | `string` | `2` | no |
+| <a name="input_clients_install_ofed"></a> [clients\_install\_ofed](#input\_clients\_install\_ofed) | Install ofed for weka clients with dpdk configuration | `bool` | `true` | no |
 | <a name="input_clients_number"></a> [clients\_number](#input\_clients\_number) | The number of client virtual machines to deploy. | `number` | `0` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The cluster name. | `string` | `"poc"` | no |
 | <a name="input_cluster_size"></a> [cluster\_size](#input\_cluster\_size) | The number of virtual machines to deploy. | `number` | `6` | no |
@@ -185,6 +186,7 @@ In the output you will get the cluster backends (and clients if you asked for) i
 | <a name="input_install_weka_url"></a> [install\_weka\_url](#input\_install\_weka\_url) | The URL of the Weka release download tar file. | `string` | `""` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The virtual machine type (sku) to deploy. | `string` | `"Standard_L8s_v3"` | no |
 | <a name="input_linux_vm_image"></a> [linux\_vm\_image](#input\_linux\_vm\_image) | The default azure vm image reference. | <pre>map(object({<br>    publisher = string<br>    offer     = string<br>    sku       = string<br>    version   = string<br>    ofed      = string<br>  }))</pre> | <pre>{<br>  "ubuntu": {<br>    "ofed": "ubuntu20.04",<br>    "offer": "0001-com-ubuntu-server-focal",<br>    "publisher": "Canonical",<br>    "sku": "20_04-lts-gen2",<br>    "version": "latest"<br>  }<br>}</pre> | no |
+| <a name="input_mount_clients_dpdk"></a> [mount\_clients\_dpdk](#input\_mount\_clients\_dpdk) | Mount weka clients in DPDK mode | `bool` | `true` | no |
 | <a name="input_obs_container_name"></a> [obs\_container\_name](#input\_obs\_container\_name) | Name of obs container name | `string` | `""` | no |
 | <a name="input_obs_name"></a> [obs\_name](#input\_obs\_name) | Name of obs storage account | `string` | `""` | no |
 | <a name="input_ofed_version"></a> [ofed\_version](#input\_ofed\_version) | The OFED driver version to for ubuntu 20. | `string` | `"5.8-1.1.2.1"` | no |
