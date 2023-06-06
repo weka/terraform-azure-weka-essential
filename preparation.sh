@@ -6,8 +6,10 @@ systemctl disable unattended-upgrades
 while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/{lock,lock-frontend} >/dev/null 2>&1; do
    sleep 2
 done
-
+apt remove unattended-upgrades -y
 apt update -y
+apt upgrade -y
+
 apt install net-tools -y
 
 # set apt private repo
