@@ -104,7 +104,7 @@ clients_number = 2
 This will automatically create 2 clients.
 <br>In addition you can supply these optional variables:
 ```hcl
-client_instance_type = "..."
+client_instance_type = "Standard_D4_v4"
 client_nics_num = DESIRED_NUM
 ```
 ### Mounting clients in udp mode
