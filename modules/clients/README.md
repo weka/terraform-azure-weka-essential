@@ -32,15 +32,12 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_apt_repo_url"></a> [apt\_repo\_url](#input\_apt\_repo\_url) | The URL of the apt private repository. | `string` | `""` | no |
 | <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Determines whether to assign public ip. | `bool` | `true` | no |
-| <a name="input_backend_ip"></a> [backend\_ip](#input\_backend\_ip) | n/a | `string` | n/a | yes |
+| <a name="input_backend_ips"></a> [backend\_ips](#input\_backend\_ips) | n/a | `list(string)` | n/a | yes |
 | <a name="input_clients_name"></a> [clients\_name](#input\_clients\_name) | The clients name. | `string` | n/a | yes |
 | <a name="input_clients_number"></a> [clients\_number](#input\_clients\_number) | The number of virtual machines to deploy. | `number` | `2` | no |
 | <a name="input_custom_image_id"></a> [custom\_image\_id](#input\_custom\_image\_id) | Custom image id | `string` | `null` | no |
-| <a name="input_get_weka_io_token"></a> [get\_weka\_io\_token](#input\_get\_weka\_io\_token) | The token to download the Weka release from get.weka.io. | `string` | n/a | yes |
 | <a name="input_install_ofed"></a> [install\_ofed](#input\_install\_ofed) | Install ofed for weka cluster with dpdk configuration | `bool` | `true` | no |
 | <a name="input_install_ofed_url"></a> [install\_ofed\_url](#input\_install\_ofed\_url) | The URL of the Blob with the OFED tgz file. | `string` | `""` | no |
-| <a name="input_install_weka_template_file"></a> [install\_weka\_template\_file](#input\_install\_weka\_template\_file) | install\_weka\_template file path | `string` | n/a | yes |
-| <a name="input_install_weka_url"></a> [install\_weka\_url](#input\_install\_weka\_url) | The URL of the Weka release download tar file. | `string` | `""` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The virtual machine type (sku) to deploy. | `string` | `"Standard_D4_v4"` | no |
 | <a name="input_linux_vm_image"></a> [linux\_vm\_image](#input\_linux\_vm\_image) | The default azure vm image reference. | `map(string)` | <pre>{<br>  "ofed": "ubuntu20.04",<br>  "offer": "0001-com-ubuntu-server-focal",<br>  "publisher": "Canonical",<br>  "sku": "20_04-lts-gen2",<br>  "version": "latest"<br>}</pre> | no |
 | <a name="input_mount_clients_dpdk"></a> [mount\_clients\_dpdk](#input\_mount\_clients\_dpdk) | Install weka cluster with DPDK | `bool` | `true` | no |
@@ -54,7 +51,6 @@ No modules.
 | <a name="input_subnets_name"></a> [subnets\_name](#input\_subnets\_name) | The subnet names list. | `list(string)` | n/a | yes |
 | <a name="input_vm_username"></a> [vm\_username](#input\_vm\_username) | The user name for logging in to the virtual machines. | `string` | `"weka"` | no |
 | <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | The virtual network name. | `string` | n/a | yes |
-| <a name="input_weka_version"></a> [weka\_version](#input\_weka\_version) | The Weka version to deploy. | `string` | n/a | yes |
 
 ## Outputs
 

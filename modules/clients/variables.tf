@@ -1,10 +1,5 @@
-variable "weka_version" {
-  type        = string
-  description = "The Weka version to deploy."
-}
-
-variable "backend_ip" {
-  type        = string
+variable "backend_ips" {
+  type        = list(string)
   description = ""
 }
 
@@ -93,20 +88,9 @@ variable "apt_repo_url" {
   description = "The URL of the apt private repository."
 }
 
-variable "install_weka_url" {
-  type        = string
-  description = "The URL of the Weka release download tar file."
-  default     = ""
-}
-
 variable "preparation_template_file" {
   type        = string
   description = "preparation_template file path"
-}
-
-variable "install_weka_template_file" {
-  type        = string
-  description = "install_weka_template file path"
 }
 
 variable "mount_clients_dpdk" {
@@ -132,12 +116,6 @@ variable "nics_map" {
 variable "ppg_id" {
   type        = string
   description = "Placement proximity group id."
-}
-
-variable "get_weka_io_token" {
-  type        = string
-  description = "The token to download the Weka release from get.weka.io."
-  sensitive   = true
 }
 
 variable "assign_public_ip" {

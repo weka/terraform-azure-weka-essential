@@ -26,17 +26,13 @@ module "clients" {
   install_ofed_url           = var.install_ofed_url
   ofed_version               = var.ofed_version
   apt_repo_url               = var.apt_repo_url
-  install_weka_url           = var.install_weka_url
   mount_clients_dpdk         = var.mount_clients_dpdk
   preparation_template_file  = local.preparation_script_path
-  install_weka_template_file = local.install_weka_script_path
   subnets_name               = data.azurerm_subnet.subnets.*.name
   vnet_name                  = local.vnet_name
   nics                       = var.mount_clients_dpdk ? var.client_nics_num : 1
   instance_type              = var.client_instance_type
-  backend_ip                 = local.first_nic_private_ips[0]
-  get_weka_io_token          = var.get_weka_io_token
-  weka_version               = var.weka_version
+  backend_ips                = local.first_nic_private_ips
   ssh_public_key             = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
   ppg_id                     = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
   assign_public_ip           = var.assign_public_ip
