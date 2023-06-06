@@ -19,7 +19,7 @@ resource "azurerm_public_ip" "public_ip" {
 
 resource "azurerm_network_interface" "primary_client_nic_public" {
   count                         = var.assign_public_ip ? var.clients_number : 0
-  name                          = "${var.clients_name}-nic-${count.index}"
+  name                          = "${var.clients_name}-primary-nic-${count.index}"
   location                      = data.azurerm_resource_group.rg.location
   resource_group_name           = var.rg_name
   enable_accelerated_networking = var.mount_clients_dpdk
@@ -35,7 +35,7 @@ resource "azurerm_network_interface" "primary_client_nic_public" {
 
 resource "azurerm_network_interface" "primary_client_nic_private" {
   count                         = var.assign_public_ip ? 0 : var.clients_number
-  name                          = "${var.clients_name}-nic-${count.index}"
+  name                          = "${var.clients_name}-primary-nic-${count.index}"
   location                      = data.azurerm_resource_group.rg.location
   resource_group_name           = var.rg_name
   enable_accelerated_networking = var.mount_clients_dpdk
@@ -48,8 +48,16 @@ resource "azurerm_network_interface" "primary_client_nic_private" {
   }
 }
 
+
+locals {
+  secondary_nics_num = (var.nics - 1) * var.clients_number
+  subnet_assigning_sequence = [
+    for i in range(local.secondary_nics_num) : data.azurerm_subnet.subnets[i % (var.nics - 1) + 1].id
+  ]
+}
+
 resource "azurerm_network_interface" "client_nic" {
-  count                         = (var.nics - 1) * var.clients_number
+  count                         = local.secondary_nics_num
   name                          = "${var.clients_name}-nic-${count.index + var.clients_number}"
   location                      = data.azurerm_resource_group.rg.location
   resource_group_name           = var.rg_name
@@ -58,13 +66,13 @@ resource "azurerm_network_interface" "client_nic" {
   ip_configuration {
     primary                       = true
     name                          = "ipconfig-${count.index + var.clients_number}"
-    subnet_id                     = data.azurerm_subnet.subnets[ceil((count.index + 1) / (var.nics - 1))].id
+    subnet_id                     = local.subnet_assigning_sequence[count.index]
     private_ip_address_allocation = "Dynamic"
   }
 
   lifecycle {
     precondition {
-      condition     = var.mount_clients_dpdk ? length(var.subnets_name) >= var.nics : true
+      condition     = length(var.subnets_name) >= var.nics
       error_message = "Each NIC's ipconfig should be on its own subnet."
     }
   }
@@ -126,7 +134,7 @@ resource "azurerm_linux_virtual_machine" "default_image_vms" {
   network_interface_ids = concat(
     # The first Network Interface ID in this list is the Primary Network Interface on the Virtual Machine.
     [local.primary_nic_ids[count.index]],
-    [for i, nic in azurerm_network_interface.client_nic.*.id : nic if i % (var.nics - 1) == count.index]
+    slice(azurerm_network_interface.client_nic.*.id, (var.nics - 1) * count.index, (var.nics - 1) * (count.index + 1))
   )
 
   os_disk {
@@ -172,7 +180,7 @@ resource "azurerm_linux_virtual_machine" "custom_image_vms" {
   network_interface_ids = concat(
     # The first Network Interface ID in this list is the Primary Network Interface on the Virtual Machine.
     [local.primary_nic_ids[count.index]],
-    [for i, nic in azurerm_network_interface.client_nic.*.id : nic if i % (var.nics - 1) == count.index]
+     slice(azurerm_network_interface.client_nic.*.id, (var.nics - 1) * count.index, (var.nics - 1) * (count.index + 1))
   )
 
   os_disk {
