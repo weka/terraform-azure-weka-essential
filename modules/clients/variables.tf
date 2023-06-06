@@ -1,7 +1,6 @@
 variable "weka_version" {
   type        = string
   description = "The Weka version to deploy."
-  default     = "4.1.0.71"
 }
 
 variable "backend_ip" {
