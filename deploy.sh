@@ -5,7 +5,6 @@ NUM_FRONTEND_CONTAINERS=${frontend_num}
 NUM_DRIVE_CONTAINERS=${drive_num}
 NICS_NUM=${nics_num}
 INSTALL_DPDK=${install_dpdk}
-SUBNETS="${all_subnets}"
 SUBNET_PREFIXES=( "${subnet_prefixes}" )
 GATEWAYS=""
 for subnet in $${SUBNET_PREFIXES[@]}

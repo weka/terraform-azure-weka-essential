@@ -66,20 +66,10 @@ function getNetStrForDpdk() {
     gateways=($gateways)
   fi
 
-  if [ -n "$subnets" ]; then #azure only
-    subnets=($subnets)
-  fi
-
   net=" "
   for ((i; i<$j; i++)); do
-    if [ -n "$subnets" ]; then
-      subnet=$${subnets[$i]}
-      subnet_inet=$(curl -s -H Metadata:true –noproxy “*” http://169.254.169.254/metadata/instance/network\?api-version\=2021-02-01 | jq --arg subnet "$subnet" '.interface[] | select(.ipv4.subnet[0].address==$subnet)' | jq -r .ipv4.ipAddress[0].privateIpAddress)
-      eth=$(ifconfig | grep -B 1 "$subnet_inet" |  head -n 1 | cut -d ':' -f1)
-    else
-      eth=eth$i
-      subnet_inet=$(ifconfig $eth | grep 'inet ' | awk '{print $2}')
-    fi
+    eth=eth$i
+    subnet_inet=$(ifconfig $eth | grep 'inet ' | awk '{print $2}')
     if [ -z "$subnet_inet" ];then
       net=""
       break
@@ -92,7 +82,7 @@ function getNetStrForDpdk() {
     IFS='/' read -ra netmask <<< "$bits"
 
     if [ -n "$gateways" ]; then
-      gateway=$${gateways[$i]}
+      gateway=$${gateways[0]}
       net="$net $net_option_name$enp/$subnet_inet/$${netmask[1]}/$gateway"
     else
       net="$net $net_option_name$eth" #aws

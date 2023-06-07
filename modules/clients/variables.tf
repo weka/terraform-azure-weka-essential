@@ -41,9 +41,9 @@ variable "clients_name" {
   description = "The clients name."
 }
 
-variable "subnets_name" {
-  type        = list(string)
-  description = "The subnet names list."
+variable "subnet_name" {
+  type        = string
+  description = "The subnet names."
 }
 
 variable "clients_number" {

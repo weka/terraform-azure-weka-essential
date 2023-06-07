@@ -14,9 +14,9 @@ variable "address_space" {
   description = "The range of IP addresses the virtual network uses."
 }
 
-variable "subnet_prefixes" {
-  type = list(string)
-  description = "A list of address prefixes to use for the subnet."
+variable "subnet_prefix" {
+  type = string
+  description = "Address prefix to use for the subnet."
 }
 
 variable "tags_map" {
