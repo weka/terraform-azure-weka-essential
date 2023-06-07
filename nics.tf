@@ -14,7 +14,7 @@ resource "azurerm_network_interface" "public_first_nic" {
   location                      = data.azurerm_resource_group.rg.location
   ip_configuration {
     name                          = "ipconfig0"
-    subnet_id                     = data.azurerm_subnet.subnets[0].id
+    subnet_id                     = data.azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
     primary                       = true
     public_ip_address_id          = azurerm_public_ip.publicIp[count.index].id
@@ -29,7 +29,7 @@ resource "azurerm_network_interface" "private_first_nic" {
   location                      = data.azurerm_resource_group.rg.location
   ip_configuration {
     name                          = "ipconfig0"
-    subnet_id                     = data.azurerm_subnet.subnets[0].id
+    subnet_id                     = data.azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
     primary                       = true
   }
@@ -43,7 +43,7 @@ resource "azurerm_network_interface" "private_nics" {
   location                      = data.azurerm_resource_group.rg.location
   ip_configuration {
     name                          = "ipconfig${count.index + var.cluster_size}"
-    subnet_id                     = data.azurerm_subnet.subnets[count.index % (local.nics_numbers - 1) + 1].id
+    subnet_id                     = data.azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
   }
 }

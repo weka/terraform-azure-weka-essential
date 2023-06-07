@@ -1,13 +1,13 @@
 # Azure-weka deployment Terraform package
 Essential weka deployment.
 <br>Creates vms and proximity placement group. Proximity placement group id can be passed and then it will not be created.
-<br>The deployment can use existing network or create vnet/subnets/security groups.
+<br>The deployment can use existing network or create vnet/subnet/security groups.
 - This deployment was created for essential weka deployment with minimum permissions.
 - This deployment doesn't support auto-scaling.
 - If you wish to review our full solution you can find it [here](https://github.com/weka/terraform-azure-weka)
 ## Weke deployment prerequisites:
 - vnet
-- subnets
+- subnet
 
 ## Resource group
 We have 2 variables that define resource group:
@@ -16,19 +16,19 @@ We have 2 variables that define resource group:
 #### rg_name:
 The resource group were weka cluster and all necessary resources will be deployed.
 #### vnet_rg_name:
-The resource group of the vnet and subnets.
+The resource group of the vnet and subnet.
 <br>If `vnet_rg_name` isn't set by the user, we assume that the
-vnet and subnets resource group is the as the weka deployment resource group.
+vnet and subnet resource group is the as the weka deployment resource group.
 <br> i.e we assume `vnet_rg_name = rg_name`
 
 ## Network deployment options
-This weka deployment can use exiting network, or create network resources (vmet, subnets, security group) automatically.
+This weka deployment can use exiting network, or create network resources (vmet, subnet, security group) automatically.
 <br>We provided a file named `vars.auto.tfvars` with example of the variables that should be supplied.
 <br>In case you want to use an existing network, you **must** provide network params.
 <br>**Example**:
 ```hcl
 vnet_name           = "essential-vnet"
-subnets             = ["essential-subnet-0", "essential-subnet-1", "essential-subnet-2", "essential-subnet-3"]
+subnet              = "essential-subnet"
 ```
 **If you don't pass these params, we will automatically create the network resources.**
 ### Weka deployment using exiting network full example:
@@ -42,10 +42,10 @@ cluster_name        = "test"
 instance_type       = "Standard_L8s_v3"
 cluster_size        = 6
 vnet_name           = "essential-vnet"
-subnets             = ["essential-subnet-0", "essential-subnet-1", "essential-subnet-2", "essential-subnet-3"]
+subnet              = "essential-subnet"
 ```
 
-### Weka deployment creating network resources (vnet, subnets, security group) full example:
+### Weka deployment creating network resources (vnet, subnet, security group) full example:
 Note: the network params from above are not supplied here
 `vars.auto.tfvars` :
 ```hcl

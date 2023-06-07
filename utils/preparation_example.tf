@@ -25,7 +25,7 @@ module "network" {
   prefix          = local.prefix
   rg_name         = local.vnet_rg_name
   address_space   = local.address_space
-  subnet_prefixes = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  subnet_prefix = "10.0.0.0/24"
 }
 
 module "dns" {
@@ -39,7 +39,7 @@ module "dns" {
 data "azurerm_subnet" "subnet" {
   resource_group_name  = local.vnet_rg_name
   virtual_network_name = module.network.vnet_name
-  name                 = module.network.subnets_names[0]
+  name                 = module.network.subnet_name
   depends_on           = [module.network]
 }
 

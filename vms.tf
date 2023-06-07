@@ -8,34 +8,33 @@ provider "azurerm" {
 }
 
 module "network" {
-  count           = length(var.subnets) == 0 ? 1 : 0
-  source          = "./modules/network"
-  prefix          = var.prefix
-  rg_name         = local.vnet_rg_name
-  address_space   = var.address_space
-  subnet_prefixes = slice(var.subnet_prefixes, 0, var.container_number_map[var.instance_type].nics)
+  count         = var.subnet == "" ? 1 : 0
+  source        = "./modules/network"
+  prefix        = var.prefix
+  rg_name       = local.vnet_rg_name
+  address_space = var.address_space
+  subnet_prefix = var.subnet_prefix
 }
 
 module "clients" {
-  count                      = var.clients_number > 0 ? 1 : 0
-  source                     = "./modules/clients"
-  rg_name                    = var.rg_name
-  clients_name               = "${var.prefix}-${var.cluster_name}-client"
-  clients_number             = var.clients_number
-  apt_repo_url               = var.apt_repo_url
-  mount_clients_dpdk         = var.mount_clients_dpdk
-  preparation_template_file  = local.preparation_script_path
-  subnets_name               = data.azurerm_subnet.subnets.*.name
-  source_image_id            = var.source_image_id
-  vnet_name                  = local.vnet_name
-  nics                       = var.mount_clients_dpdk ? var.client_nics_num : 1
-  instance_type              = var.client_instance_type
-  backend_ips                = local.first_nic_private_ips
-  ssh_public_key             = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
-  ppg_id                     = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
-  assign_public_ip           = var.assign_public_ip
-  vnet_rg_name               = local.vnet_rg_name
-
+  count                     = var.clients_number > 0 ? 1 : 0
+  source                    = "./modules/clients"
+  rg_name                   = var.rg_name
+  clients_name              = "${var.prefix}-${var.cluster_name}-client"
+  clients_number            = var.clients_number
+  apt_repo_url              = var.apt_repo_url
+  mount_clients_dpdk        = var.mount_clients_dpdk
+  preparation_template_file = local.preparation_script_path
+  subnet_name               = data.azurerm_subnet.subnet.name
+  source_image_id           = var.source_image_id
+  vnet_name                 = local.vnet_name
+  nics                      = var.mount_clients_dpdk ? var.client_nics_num : 1
+  instance_type             = var.client_instance_type
+  backend_ips               = local.first_nic_private_ips
+  ssh_public_key            = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
+  ppg_id                    = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
+  assign_public_ip          = var.assign_public_ip
+  vnet_rg_name              = local.vnet_rg_name
   depends_on = [azurerm_linux_virtual_machine.clusterizing, module.network]
 }
 
@@ -43,11 +42,10 @@ data "azurerm_resource_group" "rg" {
   name = var.rg_name
 }
 
-data "azurerm_subnet" "subnets" {
-  count                = length(var.subnets) > 0 ? length(var.subnets) : length(module.network[0].subnets_names)
+data "azurerm_subnet" "subnet" {
   resource_group_name  = local.vnet_rg_name
   virtual_network_name = local.vnet_name
-  name                 = length(var.subnets) > 0 ? var.subnets[count.index] : module.network[0].subnets_names[count.index]
+  name                 = var.subnet != "" ? var.subnet : module.network[0].subnet_name
   depends_on           = [module.network]
 }
 
@@ -78,17 +76,13 @@ locals {
   ssh_private_key_path  = "${local.ssh_path}-private-key.pem"
   public_ssh_key        = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
   disk_size             = var.default_disk_size + var.traces_per_ionode * (var.container_number_map[var.instance_type].compute + var.container_number_map[var.instance_type].drive + var.container_number_map[var.instance_type].frontend)
-  subnet_range          = data.azurerm_subnet.subnets[0].address_prefix
+  subnet_range          = data.azurerm_subnet.subnet.address_prefix
   nics_numbers          = var.install_cluster_dpdk ? var.container_number_map[var.instance_type].nics : 1
   first_nic_ids         = var.assign_public_ip ? azurerm_network_interface.public_first_nic.*.id : azurerm_network_interface.private_first_nic.*.id
   first_nic_private_ips = var.assign_public_ip ? azurerm_network_interface.public_first_nic.*.private_ip_address : azurerm_network_interface.private_first_nic.*.private_ip_address
   vms_computer_names    = [for i in range(var.cluster_size - 1) : "${var.prefix}-${var.cluster_name}-backend-${i}"]
   vnet_rg_name          = var.vnet_rg_name != "" ? var.vnet_rg_name : var.rg_name
   vnet_name             = var.vnet_name != "" ? var.vnet_name : module.network[0].vnet_name
-  all_subnets_str = join(" ", [
-    for item in data.azurerm_subnet.subnets.*.address_prefix :
-    split("/", item)[0]
-  ])
 
   preparation_script_path  = "${path.module}/preparation.sh"
   install_weka_script_path = "${path.module}/install_weka_template.sh"
@@ -124,8 +118,7 @@ locals {
     ].drive
     nics_num        = local.nics_numbers
     install_dpdk    = var.install_cluster_dpdk
-    all_subnets     = local.all_subnets_str
-    subnet_prefixes = join(" ", [for item in data.azurerm_subnet.subnets.*.address_prefix : item])
+    subnet_prefixes = data.azurerm_subnet.subnet.address_prefix
   })
 
   custom_data_parts = [
@@ -147,16 +140,18 @@ resource "azurerm_proximity_placement_group" "ppg" {
 }
 
 resource "azurerm_linux_virtual_machine" "vms" {
-  count                           = var.cluster_size - 1
-  name                            = "${var.prefix}-${var.cluster_name}-${count.index}"
-  location                        = data.azurerm_resource_group.rg.location
-  resource_group_name             = var.rg_name
-  size                            = var.instance_type
-  admin_username                  = var.vm_username
-  computer_name                   = local.vms_computer_names[count.index]
-  custom_data                     = base64encode(local.custom_data)
-  proximity_placement_group_id    = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
-  network_interface_ids           = concat([local.first_nic_ids[count.index]], slice(azurerm_network_interface.private_nics.*.id, (local.nics_numbers - 1) * count.index, (local.nics_numbers - 1) * (count.index + 1)))
+  count                        = var.cluster_size - 1
+  name                         = "${var.prefix}-${var.cluster_name}-${count.index}"
+  location                     = data.azurerm_resource_group.rg.location
+  resource_group_name          = var.rg_name
+  size                         = var.instance_type
+  admin_username               = var.vm_username
+  computer_name                = local.vms_computer_names[count.index]
+  custom_data                  = base64encode(local.custom_data)
+  proximity_placement_group_id = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
+  network_interface_ids = concat([
+    local.first_nic_ids[count.index]
+  ], slice(azurerm_network_interface.private_nics.*.id, (local.nics_numbers - 1) * count.index, (local.nics_numbers - 1) * (count.index + 1)))
   disable_password_authentication = true
   tags                            = merge(var.tags_map, { "weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id })
   source_image_id                 = var.source_image_id
