@@ -1,13 +1,17 @@
+INSTALLATION_PATH="/tmp/weka"
+mkdir -p $INSTALLATION_PATH
+cd $INSTALLATION_PATH
+
 IFS=" " read -ra ips <<< "${backend_ips}"
 backend_ip="$${ips[RANDOM % $${#ips[@]}]}"
 # install weka using random backend ip from ips list
 function retry_weka_install {
   retry_max=60
-  retry_sleep=10
+  retry_sleep=30
   count=$retry_max
 
   while [ $count -gt 0 ]; do
-      curl --fail $backend_ip:14000/dist/v1/install > install_script.sh && break
+      curl --fail -o install_script.sh $backend_ip:14000/dist/v1/install && break
       count=$(($count - 1))
       backend_ip="$${ips[RANDOM % $${#ips[@]}]}"
       echo "Retrying weka install from $backend_ip in $retry_sleep seconds..."
