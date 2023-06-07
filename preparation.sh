@@ -45,17 +45,16 @@ EOF
 done
 
 # config network with multi nics
-if [[ ${install_dpdk} == true ]]; then
-  for(( i=0; i<${nics_num}; i++)); do
-    echo "20$i eth$i-rt" >> /etc/iproute2/rt_tables
-  done
+for(( i=0; i<${nics_num}; i++)); do
+  echo "20$i eth$i-rt" >> /etc/iproute2/rt_tables
+done
 
-  echo "network:"> /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
-  echo "  config: disabled" >> /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
-  gateway=$(ip r | grep default | awk '{print $3}')
-  for(( i=0; i<${nics_num}; i++ )); do
-    eth=$(ifconfig | grep eth$i -C2 | grep 'inet ' | awk '{print $2}')
-    cat <<-EOF | sed -i "/            set-name: eth$i/r /dev/stdin" /etc/netplan/50-cloud-init.yaml
+echo "network:"> /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+echo "  config: disabled" >> /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+gateway=$(ip r | grep default | awk '{print $3}')
+for(( i=0; i<${nics_num}; i++ )); do
+  eth=$(ifconfig | grep eth$i -C2 | grep 'inet ' | awk '{print $2}')
+  cat <<-EOF | sed -i "/            set-name: eth$i/r /dev/stdin" /etc/netplan/50-cloud-init.yaml
             routes:
              - to: ${subnet_range}
                via: $gateway
@@ -70,8 +69,8 @@ if [[ ${install_dpdk} == true ]]; then
              - to: $eth/32
                table: 20$i
 EOF
-  done
-fi
+done
+
 
 netplan apply
 
