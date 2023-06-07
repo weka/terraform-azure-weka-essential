@@ -15,10 +15,9 @@ resource "azurerm_virtual_network" "vnet" {
 }
 
 resource "azurerm_subnet" "subnet" {
-  count                = length(var.subnet_prefixes)
   resource_group_name  = var.rg_name
-  name                 = "${var.prefix}-subnet-${count.index}"
-  address_prefixes     = [var.subnet_prefixes[count.index]]
+  name                 = "${var.prefix}-subnet"
+  address_prefixes     = [var.subnet_prefix]
   virtual_network_name = azurerm_virtual_network.vnet.name
   lifecycle {
     ignore_changes = [service_endpoint_policy_ids, service_endpoints]
@@ -70,8 +69,7 @@ resource "azurerm_network_security_group" "sg" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "sg-association" {
-  count                     = length(var.subnet_prefixes)
-  subnet_id                 = azurerm_subnet.subnet[count.index].id
+  subnet_id                 = azurerm_subnet.subnet.id
   network_security_group_id = azurerm_network_security_group.sg.id
   depends_on                = [azurerm_network_security_group.sg]
 }
@@ -80,6 +78,6 @@ output "vnet_name" {
   value = azurerm_virtual_network.vnet.name
 }
 
-output "subnets_names" {
-  value = azurerm_subnet.subnet.*.name
+output "subnet_name" {
+  value = azurerm_subnet.subnet.name
 }

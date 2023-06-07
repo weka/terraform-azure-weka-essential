@@ -33,10 +33,10 @@ variable "vnet_name" {
   default     = ""
 }
 
-variable "subnets" {
-  type        = list(string)
-  description = "The subnet names list."
-  default     = []
+variable "subnet" {
+  type        = string
+  description = "The subnet name."
+  default     = ""
 }
 
 variable "address_space" {
@@ -45,17 +45,13 @@ variable "address_space" {
   default     = "10.0.0.0/16"
 }
 
-variable "subnet_prefixes" {
-  type        = list(string)
+variable "subnet_prefix" {
+  type        = string
   description = <<EOF
-    A list of address prefixes to use for the subnet.
-    Relevant only for network creation mode, where subnets weren't supplied.
-    The number of subnets to use wil be determined according to the instance type"
+    Prefix to use subnet.
+    Relevant only for network creation mode, where subnet wasn't supplied.
   EOF
-  default = [
-    "10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24", "10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24",
-    "10.0.7.0/24"
-  ]
+  default = "10.0.0.0/24"
 }
 
 variable "cluster_size" {
@@ -98,7 +94,7 @@ variable "linux_vm_image" {
 variable "weka_version" {
   type        = string
   description = "The Weka version to deploy."
-  default     = "4.2.0"
+  default     = "4.2.0.134-azuredk"
 }
 
 variable "get_weka_io_token" {

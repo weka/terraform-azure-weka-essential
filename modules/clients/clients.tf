@@ -2,11 +2,10 @@ data "azurerm_resource_group" "rg" {
   name = var.rg_name
 }
 
-data "azurerm_subnet" "subnets" {
-  count                = length(var.subnets_name)
-  resource_group_name  = var.vnet_rg_name
+data "azurerm_subnet" "subnet" {
+  resource_group_name  = var.rg_name
   virtual_network_name = var.vnet_name
-  name                 = var.subnets_name[count.index]
+  name                 = var.subnet_name
 }
 
 resource "azurerm_public_ip" "public_ip" {
@@ -27,7 +26,7 @@ resource "azurerm_network_interface" "primary_client_nic_public" {
   ip_configuration {
     primary                       = true
     name                          = "ipconfig0"
-    subnet_id                     = data.azurerm_subnet.subnets[0].id
+    subnet_id                     = data.azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.public_ip[count.index].id
   }
@@ -43,7 +42,7 @@ resource "azurerm_network_interface" "primary_client_nic_private" {
   ip_configuration {
     primary                       = true
     name                          = "ipconfig0"
-    subnet_id                     = data.azurerm_subnet.subnets[0].id
+    subnet_id                     = data.azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
   }
 }
@@ -51,9 +50,6 @@ resource "azurerm_network_interface" "primary_client_nic_private" {
 
 locals {
   secondary_nics_num = (var.nics - 1) * var.clients_number
-  subnet_assigning_sequence = [
-    for i in range(local.secondary_nics_num) : data.azurerm_subnet.subnets[i % (var.nics - 1) + 1].id
-  ]
 }
 
 resource "azurerm_network_interface" "client_nic" {
@@ -66,15 +62,8 @@ resource "azurerm_network_interface" "client_nic" {
   ip_configuration {
     primary                       = true
     name                          = "ipconfig-${count.index + var.clients_number}"
-    subnet_id                     = local.subnet_assigning_sequence[count.index]
+    subnet_id                     = data.azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
-  }
-
-  lifecycle {
-    precondition {
-      condition     = length(var.subnets_name) >= var.nics
-      error_message = "Each NIC's ipconfig should be on its own subnet."
-    }
   }
 }
 
@@ -86,17 +75,13 @@ locals {
     install_ofed_url = var.install_ofed_url
     nics_num         = var.nics
     install_dpdk     = var.mount_clients_dpdk
-    subnet_range     = data.azurerm_subnet.subnets[0].address_prefix
+    subnet_range     = data.azurerm_subnet.subnet.address_prefix
     ofed_type        = var.linux_vm_image.ofed
   })
 
   mount_wekafs_script = templatefile("${path.module}/mount_wekafs.sh", {
-    all_subnets = join(" ", [
-      for item in data.azurerm_subnet.subnets.*.address_prefix : split("/", item)[0]
-    ])
-    all_gateways = join(" ", [
-      for item in data.azurerm_subnet.subnets.*.address_prefix : cidrhost(item, 1)
-    ])
+    all_subnets = split("/", data.azurerm_subnet.subnet.address_prefix)[0]
+    all_gateways = cidrhost(data.azurerm_subnet.subnet.address_prefix, 1)
     nics_num           = var.nics
     backend_ips        = join(" ", var.backend_ips)
     mount_clients_dpdk = var.mount_clients_dpdk
