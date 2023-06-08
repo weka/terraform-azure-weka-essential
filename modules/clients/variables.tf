@@ -123,3 +123,8 @@ variable "assign_public_ip" {
   default     = true
   description = "Determines whether to assign public ip."
 }
+
+variable "vnet_rg_name" {
+  type        = string
+  description = "Resource group name of vnet"
+}
