@@ -51,6 +51,7 @@ No modules.
 | <a name="input_subnets_name"></a> [subnets\_name](#input\_subnets\_name) | The subnet names list. | `list(string)` | n/a | yes |
 | <a name="input_vm_username"></a> [vm\_username](#input\_vm\_username) | The user name for logging in to the virtual machines. | `string` | `"weka"` | no |
 | <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | The virtual network name. | `string` | n/a | yes |
+| <a name="input_vnet_rg_name"></a> [vnet\_rg\_name](#input\_vnet\_rg\_name) | Resource group name of vnet | `string` | n/a | yes |
 
 ## Outputs
 
