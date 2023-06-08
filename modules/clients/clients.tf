@@ -4,7 +4,7 @@ data "azurerm_resource_group" "rg" {
 
 data "azurerm_subnet" "subnets" {
   count                = length(var.subnets_name)
-  resource_group_name  = var.rg_name
+  resource_group_name  = var.vnet_rg_name
   virtual_network_name = var.vnet_name
   name                 = var.subnets_name[count.index]
 }

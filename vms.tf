@@ -36,6 +36,7 @@ module "clients" {
   ssh_public_key             = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
   ppg_id                     = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
   assign_public_ip           = var.assign_public_ip
+  vnet_rg_name               = local.vnet_rg_name
 
   depends_on = [azurerm_linux_virtual_machine.clusterizing, module.network]
 }
