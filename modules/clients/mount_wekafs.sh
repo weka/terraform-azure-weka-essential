@@ -7,7 +7,7 @@ function retry_weka_install {
   count=$retry_max
 
   while [ $count -gt 0 ]; do
-      curl --fail $backend_ip:14000/dist/v1/install > install_script.sh && break
+      curl --fail $backend_ip:14000/dist/v1/install > /tmp/install_script.sh && break
       count=$(($count - 1))
       backend_ip="$${ips[RANDOM % $${#ips[@]}]}"
       echo "Retrying weka install from $backend_ip in $retry_sleep seconds..."
@@ -17,7 +17,7 @@ function retry_weka_install {
       echo "weka install failed after $retry_max attempts"
       return 1
   }
-  chmod +x install_script.sh && ./install_script.sh
+  chmod +x /tmp/install_script.sh && /tmp/install_script.sh
   return 0
 }
 
