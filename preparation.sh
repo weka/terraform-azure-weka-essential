@@ -18,33 +18,50 @@ EOF
 done
 
 # config network with multi nics
-for(( i=0; i<${nics_num}; i++)); do
-  echo "20$i eth$i-rt" >> /etc/iproute2/rt_tables
-done
+echo "200 eth0-rt" >> /etc/iproute2/rt_tables
 
 echo "network:"> /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
 echo "  config: disabled" >> /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
 gateway=$(ip r | grep default | awk '{print $3}')
-for(( i=0; i<${nics_num}; i++ )); do
-  eth=$(ifconfig | grep eth$i -C2 | grep 'inet ' | awk '{print $2}')
-  cat <<-EOF | sed -i "/            set-name: eth$i/r /dev/stdin" /etc/netplan/50-cloud-init.yaml
+eth=$(ifconfig | grep eth0 -C2 | grep 'inet ' | awk '{print $2}')
+cat <<-EOF | sed -i "/            set-name: eth0/r /dev/stdin" /etc/netplan/50-cloud-init.yaml
             routes:
              - to: ${subnet_range}
                via: $gateway
                metric: 200
-               table: 20$i
+               table: 200
              - to: 0.0.0.0/0
                via: $gateway
-               table: 20$i
+               table: 200
             routing-policy:
              - from: $eth/32
-               table: 20$i
+               table: 200
              - to: $eth/32
-               table: 20$i
+               table: 200
 EOF
-done
 
 netplan apply
+
+cat >/etc/systemd/system/netplan-remove-route.service <<EOF
+[Unit]
+Description=Remove specific routes
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+for(( i=1; i<${nics_num}; i++ )); do
+  sed -i "/Type=oneshot/a ExecStart=/usr/sbin/ip route del ${subnet_range} dev eth$i" /etc/systemd/system/netplan-remove-route.service
+done
+
+systemctl daemon-reload
+systemctl enable netplan-remove-route.service
+systemctl start netplan-remove-route.service
 
 # remove installation path before installing weka
 rm -rf $INSTALLATION_PATH
