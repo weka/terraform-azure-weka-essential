@@ -63,19 +63,21 @@ resource "tls_private_key" "ssh_key" {
 resource "local_file" "public_key" {
   count           = var.ssh_public_key == null ? 1 : 0
   content         = tls_private_key.ssh_key[count.index].public_key_openssh
-  filename        = "${local.ssh_path}-public-key.pub"
+  filename        = local.ssh_public_key_path
   file_permission = "0600"
 }
 
 resource "local_file" "private_key" {
   count           = var.ssh_public_key == null ? 1 : 0
   content         = tls_private_key.ssh_key[count.index].private_key_pem
-  filename        = "${local.ssh_path}-private-key.pem"
+  filename        = local.ssh_private_key_path
   file_permission = "0600"
 }
 
 locals {
   ssh_path              = "/tmp/${var.prefix}-${var.cluster_name}"
+  ssh_public_key_path   = "${local.ssh_path}-public-key.pub"
+  ssh_private_key_path  = "${local.ssh_path}-private-key.pem"
   public_ssh_key        = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
   disk_size             = var.default_disk_size + var.traces_per_ionode * (var.container_number_map[var.instance_type].compute + var.container_number_map[var.instance_type].drive + var.container_number_map[var.instance_type].frontend)
   subnet_range          = data.azurerm_subnet.subnets[0].address_prefix

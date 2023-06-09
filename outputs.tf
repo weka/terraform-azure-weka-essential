@@ -19,3 +19,7 @@ output "client_ips" {
   value       = length(module.clients) > 0 ? module.clients.0.client-ips : null
   description = "Weka clients ips. If 'assign_public_ip' is set to true, it will output public ips, otherwise private ips"
 }
+
+output "private_ssh_key" {
+  value = var.ssh_public_key == null ? local.ssh_private_key_path : null
+}
