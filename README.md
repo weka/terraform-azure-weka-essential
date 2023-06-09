@@ -215,4 +215,5 @@ In the output you will get the cluster backends (and clients if you asked for) i
 |------|-------------|
 | <a name="output_backends_ips"></a> [backends\_ips](#output\_backends\_ips) | Weka backends ips. If 'assign\_public\_ip' is set to true, it will output public ips, otherwise private ips |
 | <a name="output_client_ips"></a> [client\_ips](#output\_client\_ips) | Weka clients ips. If 'assign\_public\_ip' is set to true, it will output public ips, otherwise private ips |
+| <a name="output_private_ssh_key"></a> [private\_ssh\_key](#output\_private\_ssh\_key) | n/a |
 <!-- END_TF_DOCS -->
