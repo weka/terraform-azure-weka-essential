@@ -32,20 +32,7 @@ resource "azurerm_linux_virtual_machine" "clusterizing" {
   proximity_placement_group_id    = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
   network_interface_ids           = concat([local.first_nic_ids[var.cluster_size - 1]], slice(azurerm_network_interface.private_nics.*.id, ( local.nics_numbers - 1 )* (var.cluster_size - 1), (local.nics_numbers - 1) * var.cluster_size))
   tags                            = merge(var.tags_map,{"weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id })
-  source_image_reference {
-    offer     = var.linux_vm_image[var.os_type].offer
-    publisher = var.linux_vm_image[var.os_type].publisher
-    sku       = var.linux_vm_image[var.os_type].sku
-    version   = var.linux_vm_image[var.os_type].version
-  }
-  dynamic "plan" {
-    for_each = var.os_type != "ubuntu" ? [1] : []
-    content {
-      name      = var.linux_vm_image[var.os_type].sku
-      product   = var.linux_vm_image[var.os_type].offer
-      publisher = var.linux_vm_image[var.os_type].publisher
-    }
-  }
+  source_image_id                 = var.source_image_id
   os_disk {
     caching              = "ReadWrite"
     name                 = "clusterizing-os-disk-${var.prefix}-${var.cluster_name}-${var.cluster_size - 1}"

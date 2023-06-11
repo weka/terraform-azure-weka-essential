@@ -22,13 +22,11 @@ module "clients" {
   rg_name                    = var.rg_name
   clients_name               = "${var.prefix}-${var.cluster_name}-client"
   clients_number             = var.clients_number
-  install_ofed               = var.mount_clients_dpdk ? var.clients_install_ofed : false
-  install_ofed_url           = var.install_ofed_url
-  ofed_version               = var.ofed_version
   apt_repo_url               = var.apt_repo_url
   mount_clients_dpdk         = var.mount_clients_dpdk
   preparation_template_file  = local.preparation_script_path
   subnets_name               = data.azurerm_subnet.subnets.*.name
+  source_image_id            = var.source_image_id
   vnet_name                  = local.vnet_name
   nics                       = var.mount_clients_dpdk ? var.client_nics_num : 1
   instance_type              = var.client_instance_type
@@ -97,13 +95,9 @@ locals {
 
   preparation_script = templatefile(local.preparation_script_path, {
     apt_repo_url     = var.apt_repo_url
-    install_ofed     = var.install_ofed
-    ofed_version     = var.ofed_version
-    install_ofed_url = var.install_ofed_url
     nics_num         = local.nics_numbers
     install_dpdk     = var.install_cluster_dpdk
     subnet_range     = local.subnet_range
-    ofed_type        = var.linux_vm_image[var.os_type].ofed
   })
 
   attach_disk_script = templatefile("${path.module}/attach_disk.sh", {
@@ -165,20 +159,7 @@ resource "azurerm_linux_virtual_machine" "vms" {
   network_interface_ids           = concat([local.first_nic_ids[count.index]], slice(azurerm_network_interface.private_nics.*.id, (local.nics_numbers - 1) * count.index, (local.nics_numbers - 1) * (count.index + 1)))
   disable_password_authentication = true
   tags                            = merge(var.tags_map, { "weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id })
-  source_image_reference {
-    offer     = var.linux_vm_image[var.os_type].offer
-    publisher = var.linux_vm_image[var.os_type].publisher
-    sku       = var.linux_vm_image[var.os_type].sku
-    version   = var.linux_vm_image[var.os_type].version
-  }
-  dynamic "plan" {
-    for_each = var.os_type != "ubuntu" ? [1] : []
-    content {
-      name      = var.linux_vm_image[var.os_type].sku
-      product   = var.linux_vm_image[var.os_type].offer
-      publisher = var.linux_vm_image[var.os_type].publisher
-    }
-  }
+  source_image_id                 = var.source_image_id
 
   os_disk {
     caching              = "ReadWrite"

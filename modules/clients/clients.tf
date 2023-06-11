@@ -81,13 +81,9 @@ resource "azurerm_network_interface" "client_nic" {
 locals {
   preparation_script = templatefile(var.preparation_template_file, {
     apt_repo_url     = var.apt_repo_url
-    install_ofed     = var.custom_image_id == null ? var.install_ofed : false
-    ofed_version     = var.ofed_version
-    install_ofed_url = var.install_ofed_url
     nics_num         = var.nics
     install_dpdk     = var.mount_clients_dpdk
     subnet_range     = data.azurerm_subnet.subnets[0].address_prefix
-    ofed_type        = var.linux_vm_image.ofed
   })
 
   mount_wekafs_script = templatefile("${path.module}/mount_wekafs.sh", {
@@ -108,8 +104,8 @@ locals {
   vms_custom_data = base64encode(join("\n", local.custom_data_parts))
 }
 
-resource "azurerm_linux_virtual_machine" "default_image_vms" {
-  count                           = var.custom_image_id == null ? var.clients_number : 0
+resource "azurerm_linux_virtual_machine" "vms" {
+  count                           = var.clients_number
   name                            = "${var.clients_name}-vm-${count.index}"
   computer_name                   = "${var.clients_name}-${count.index}"
   location                        = data.azurerm_resource_group.rg.location
@@ -120,52 +116,7 @@ resource "azurerm_linux_virtual_machine" "default_image_vms" {
   disable_password_authentication = true
   proximity_placement_group_id    = var.ppg_id
   tags                            = merge({ "weka_cluster" : var.clients_name })
-
-  network_interface_ids = concat(
-    # The first Network Interface ID in this list is the Primary Network Interface on the Virtual Machine.
-    [local.primary_nic_ids[count.index]],
-    slice(azurerm_network_interface.client_nic.*.id, (var.nics - 1) * count.index, (var.nics - 1) * (count.index + 1))
-  )
-
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "StandardSSD_LRS"
-  }
-
-  identity {
-    type = "SystemAssigned"
-  }
-
-  source_image_reference {
-    offer     = lookup(var.linux_vm_image, "offer", null)
-    publisher = lookup(var.linux_vm_image, "publisher", null)
-    sku       = lookup(var.linux_vm_image, "sku", null)
-    version   = lookup(var.linux_vm_image, "version", null)
-  }
-
-  admin_ssh_key {
-    username   = var.vm_username
-    public_key = var.ssh_public_key
-  }
-
-  lifecycle {
-    ignore_changes = [custom_data]
-  }
-}
-
-resource "azurerm_linux_virtual_machine" "custom_image_vms" {
-  count                           = var.custom_image_id != null ? var.clients_number : 0
-  name                            = "${var.clients_name}-vm-${count.index}"
-  computer_name                   = "${var.clients_name}-${count.index}"
-  location                        = data.azurerm_resource_group.rg.location
-  resource_group_name             = var.rg_name
-  size                            = var.instance_type
-  admin_username                  = var.vm_username
-  custom_data                     = local.vms_custom_data
-  disable_password_authentication = true
-  proximity_placement_group_id    = var.ppg_id
-  tags                            = merge({ "weka_cluster" : var.clients_name })
-  source_image_id                 = var.custom_image_id
+  source_image_id                 = var.source_image_id
 
   network_interface_ids = concat(
     # The first Network Interface ID in this list is the Primary Network Interface on the Virtual Machine.
