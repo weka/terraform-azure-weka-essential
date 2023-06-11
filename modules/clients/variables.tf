@@ -9,22 +9,9 @@ variable "nics" {
   description = "Number of nics to set on each client vm"
 }
 
-variable "linux_vm_image" {
-  type        = map(string)
-  description = "The default azure vm image reference."
-  default = {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-focal"
-    sku       = "20_04-lts-gen2"
-    version   = "latest"
-    ofed      = "ubuntu20.04"
-  }
-}
-
-variable "custom_image_id" {
+variable "source_image_id" {
   type        = string
-  description = "Custom image id"
-  default     = null
+  description = "Use weka custom image, ubuntu 20.04 with kernel 5.4 and ofed 5.8-1.1.2.1"
 }
 
 variable "rg_name" {
@@ -70,18 +57,6 @@ variable "ssh_public_key" {
   description = "The VM public key. If it is not set, the keys are auto-generated."
 }
 
-variable "ofed_version" {
-  type        = string
-  description = "The OFED driver version to for ubuntu 20."
-  default     = "5.8-1.1.2.1"
-}
-
-variable "install_ofed_url" {
-  type        = string
-  description = "The URL of the Blob with the OFED tgz file."
-  default     = ""
-}
-
 variable "apt_repo_url" {
   type        = string
   default     = ""
@@ -97,12 +72,6 @@ variable "mount_clients_dpdk" {
   type        = bool
   default     = true
   description = "Install weka cluster with DPDK"
-}
-
-variable "install_ofed" {
-  type        = bool
-  default     = true
-  description = "Install ofed for weka cluster with dpdk configuration"
 }
 
 variable "nics_map" {
