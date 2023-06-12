@@ -135,6 +135,11 @@ In order to mount clients in udp mode you should pass the following param (in ad
 ```hcl
 mount_clients_dpdk = false
 ```
+## Weka custom image
+As you can see via `source_image_id` variable, we use our own custom image.
+This is a community image that we created and uploaded to azure.
+In case you would like to view how we created the image you can find it [here](https://github.com/weka/terraform-azure-weka-custom-image).
+You can as well create it on your own subscription and use it.
 ## Terraform output
 In the output you will get the cluster backends (and clients if you asked for) ips.
 <br>If `assign_public_ip` is set to `true` you will get a list of public ips, otherwise a list of private ips.
