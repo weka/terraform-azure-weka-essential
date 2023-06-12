@@ -28,7 +28,6 @@ variable "vm_username" {
 variable "instance_type" {
   type        = string
   description = "The virtual machine type (sku) to deploy."
-  default     = "Standard_D4_v4"
 }
 
 variable "vnet_name" {
