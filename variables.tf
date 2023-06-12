@@ -275,7 +275,7 @@ variable "clients_number" {
 variable "client_instance_type" {
   type        = string
   description = "The client virtual machine type (sku) to deploy."
-  default     = "Standard_D4_v4"
+  default     = "Standard_D8_v5"
 }
 
 variable "client_nics_num" {
