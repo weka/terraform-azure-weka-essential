@@ -284,9 +284,3 @@ variable "mount_clients_dpdk" {
   default     = true
   description = "Mount weka clients in DPDK mode"
 }
-
-variable "clients_install_ofed" {
-  type        = bool
-  default     = true
-  description = "Install ofed for weka clients with dpdk configuration"
-}
