@@ -16,7 +16,7 @@ provider "azurerm" {
 }
 
 module weka_deployment {
-  source            = "../.."
+  source            = "git@github.com:weka/terraform-azure-weka-essential.git"
   prefix            = "essential"
   rg_name           = "example"
   cluster_name      = "test"
