@@ -23,5 +23,7 @@ No inputs.
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_cluster"></a> [cluster](#output\_cluster) | n/a |
 <!-- END_TF_DOCS -->
