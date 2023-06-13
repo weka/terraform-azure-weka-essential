@@ -5,7 +5,7 @@ provider "azurerm" {
   }
 }
 
-module weka_deployment {
+module "weka_deployment" {
   source            = "../.."
   prefix            = "essential"
   rg_name           = "example"
@@ -15,6 +15,6 @@ module weka_deployment {
   get_weka_io_token = "..."
 }
 
-output "cluster" {
-  value       = module.weka_deployment.cluster
+output "weka_deployment_output" {
+  value = module.weka_deployment
 }

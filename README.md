@@ -27,8 +27,8 @@ module weka_deployment {
   subnet            = "essential-subnet"
 }
 
-output "cluster" {
-  value       = module.weka_deployment.cluster
+output "weka_deployment_output" {
+  value = module.weka_deployment
 }
 ```
 
