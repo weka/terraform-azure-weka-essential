@@ -50,7 +50,7 @@ vnet and subnet resource group is the as the weka deployment resource group.
 
 ## Network deployment options
 This weka deployment can use exiting network, or create network resources (vmet, subnet, security group) automatically.
-<br>We provided a file named `vars.auto.tfvars` with example of the variables that should be supplied.
+<br>Check our [examples](examples).
 <br>In case you want to use an existing network, you **must** provide network params.
 <br>**Example**:
 ```hcl
@@ -59,30 +59,32 @@ subnet              = "essential-subnet"
 ```
 **If you don't pass these params, we will automatically create the network resources.**
 ### Weka deployment using exiting network full example:
-`vars.auto.tfvars` :
 ```hcl
-subscription_id     = "..."
-get_weka_io_token   = "..."
-prefix              = "essential"
-rg_name             = "example"
-cluster_name        = "test"
-instance_type       = "Standard_L8s_v3"
-cluster_size        = 6
-vnet_name           = "essential-vnet"
-subnet              = "essential-subnet"
+module "weka_deployment" {
+  source            = "git@github.com:weka/terraform-azure-weka-essential.git"
+  prefix            = "essential"
+  rg_name           = "example"
+  cluster_name      = "test"
+  instance_type     = "Standard_L8s_v3"
+  cluster_size      = 6
+  get_weka_io_token = "..."
+  vnet_name         = "essential-vnet"
+  subnet            = "essential-subnet"
+}
 ```
 
 ### Weka deployment creating network resources (vnet, subnet, security group) full example:
-Note: the network params from above are not supplied here
-`vars.auto.tfvars` :
+Note: the network params from above are not supplied here:
 ```hcl
-subscription_id     = "..."
-get_weka_io_token   = "..."
-prefix              = "essential"
-rg_name             = "example"
-cluster_name        = "test"
-instance_type       = "Standard_L8s_v3"
-cluster_size        = 6
+module "weka_deployment" {
+  source            = "git@github.com:weka/terraform-azure-weka-essential.git"
+  prefix            = "essential"
+  rg_name           = "example"
+  cluster_name      = "test"
+  instance_type     = "Standard_L8s_v3"
+  cluster_size      = 6
+  get_weka_io_token = "..."
+}
 ```
 
 ### Private network deployment:
