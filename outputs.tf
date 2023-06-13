@@ -10,15 +10,17 @@ data "azurerm_public_ip" "public_ips" {
   depends_on          = [azurerm_linux_virtual_machine.vms, azurerm_linux_virtual_machine.clusterizing]
 }
 
-output "cluster" {
-  value = {
-    backend_ips     = var.assign_public_ip ? data.azurerm_public_ip.public_ips.*.ip_address : local.first_nic_private_ips
-    client_ips      = length(module.clients) > 0 ? module.clients.0.client-ips : null
-    private_ssh_key = var.ssh_public_key == null ? local.ssh_private_key_path : null
-  }
-  description = <<EOF
-    backend_ips:  If 'assign_public_ip' is set to true, it will output backends public ips, otherwise private ips.
-    client_ips:  If 'assign_public_ip' is set to true, it will output clients public ips, otherwise private ips.
-    private_ssh_key:  If 'ssh_public_key' is set to null, it will output the private ssh key location.
-  EOF
+output "backend_ips" {
+  value       = var.assign_public_ip ? data.azurerm_public_ip.public_ips.*.ip_address : local.first_nic_private_ips
+  description = "If 'assign_public_ip' is set to true, it will output backends public ips, otherwise private ips."
+}
+
+output "client_ips" {
+  value       = length(module.clients) > 0 ? module.clients.0.client-ips : null
+  description = "If 'assign_public_ip' is set to true, it will output clients public ips, otherwise private ips."
+}
+
+output "private_ssh_key" {
+  value       = var.ssh_public_key == null ? local.ssh_private_key_path : null
+  description = "private_ssh_key:  If 'ssh_public_key' is set to null, it will output the private ssh key location."
 }

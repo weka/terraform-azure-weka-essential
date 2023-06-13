@@ -5,7 +5,7 @@ provider "azurerm" {
   }
 }
 
-module weka_deployment {
+module "weka_deployment" {
   source            = "../.."
   prefix            = "essential"
   rg_name           = "example"
@@ -17,6 +17,6 @@ module weka_deployment {
   subnet            = "essential-subnet"
 }
 
-output "cluster" {
-  value       = module.weka_deployment.cluster
+output "weka_deployment_output" {
+  value = module.weka_deployment
 }
