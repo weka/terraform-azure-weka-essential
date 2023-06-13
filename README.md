@@ -26,6 +26,10 @@ module weka_deployment {
   vnet_name         = "essential-vnet"
   subnet            = "essential-subnet"
 }
+
+output "cluster" {
+  value       = module.weka_deployment.cluster
+}
 ```
 
 ## Weke deployment prerequisites:
