@@ -46,13 +46,13 @@ sleep 30s
 DRIVE_NUMS=( $(weka cluster container | grep drives | awk '{print $1;}') )
 
 for drive_num in "$${DRIVE_NUMS[@]}"; do
-	for (( d=0; d<$NVMES_NUM; d++ )); do
-		if [ lsblk "/dev/nvme$d"n1 >/dev/null 2>&1 ];then
-			weka cluster drive add $drive_num "/dev/nvme$d"n1 # azure
-		else
-			weka cluster drive add $drive_num "/dev/nvme0n$((d+1))" #gcp
-		fi
-	done
+  for (( d=0; d<$NVMES_NUM; d++ )); do
+    while ! lsblk "/dev/nvme$d"n1 >/dev/null 2>&1 ; do
+      echo "waiting for nvme$dn1 to be ready"
+      sleep 5
+    done
+    weka cluster drive add "$drive_num" "/dev/nvme$d"n1
+  done
 done
 
 weka cluster update --cluster-name="$CLUSTER_NAME"
