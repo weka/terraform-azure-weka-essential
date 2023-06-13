@@ -25,5 +25,5 @@ No inputs.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_cluster"></a> [cluster](#output\_cluster) | n/a |
+| <a name="output_weka_deployment_output"></a> [weka\_deployment\_output](#output\_weka\_deployment\_output) | n/a |
 <!-- END_TF_DOCS -->

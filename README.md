@@ -240,5 +240,7 @@ In the output you will get the cluster backends (and clients if you asked for) i
 
 | Name | Description |
 |------|-------------|
-| <a name="output_cluster"></a> [cluster](#output\_cluster) | backend\_ips:  If 'assign\_public\_ip' is set to true, it will output backends public ips, otherwise private ips.<br>    client\_ips:  If 'assign\_public\_ip' is set to true, it will output clients public ips, otherwise private ips.<br>    private\_ssh\_key:  If 'ssh\_public\_key' is set to null, it will output the private ssh key location. |
+| <a name="output_backend_ips"></a> [backend\_ips](#output\_backend\_ips) | If 'assign\_public\_ip' is set to true, it will output backends public ips, otherwise private ips. |
+| <a name="output_client_ips"></a> [client\_ips](#output\_client\_ips) | If 'assign\_public\_ip' is set to true, it will output clients public ips, otherwise private ips. |
+| <a name="output_private_ssh_key"></a> [private\_ssh\_key](#output\_private\_ssh\_key) | private\_ssh\_key:  If 'ssh\_public\_key' is set to null, it will output the private ssh key location. |
 <!-- END_TF_DOCS -->
