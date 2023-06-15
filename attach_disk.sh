@@ -1,5 +1,10 @@
 sleep 30s
 
+while ! [ "$(lsblk | grep ${disk_size}G | awk '{print $1}')" ] ; do
+  echo "waiting for disk to be ready"
+  sleep 5
+done
+
 wekaiosw_device=/dev/"$(lsblk | grep ${disk_size}G | awk '{print $1}')"
 
 status=0
