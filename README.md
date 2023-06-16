@@ -49,7 +49,7 @@ vnet and subnet resource group is the as the weka deployment resource group.
 <br> i.e we assume `vnet_rg_name = rg_name`
 
 ## Network deployment options
-This weka deployment can use exiting network, or create network resources (vmet, subnet, security group) automatically.
+This weka deployment can use existing network, or create network resources (vmet, subnet, security group) automatically.
 <br>Check our [examples](examples).
 <br>In case you want to use an existing network, you **must** provide network params.
 <br>**Example**:
@@ -58,10 +58,11 @@ vnet_name           = "essential-vnet"
 subnet              = "essential-subnet"
 ```
 **If you don't pass these params, we will automatically create the network resources.**
-### Weka deployment using exiting network full example:
+### Weka deployment using existing network full example:
 ```hcl
 module "weka_deployment" {
-  source            = "git@github.com:weka/terraform-azure-weka-essential.git"
+  source            = "weka/weka-essential/azure"
+  version           = "1.0.0"
   prefix            = "essential"
   rg_name           = "example"
   cluster_name      = "test"
