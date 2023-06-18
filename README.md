@@ -101,7 +101,7 @@ install_weka_url = "..."
 ```
 ## Ssh keys
 The username for ssh into vms is `weka`.
-We allow passing exising public key string:
+We allow passing existing public key string:
 ```hcl
 ssh_public_key = "..."
 ```
