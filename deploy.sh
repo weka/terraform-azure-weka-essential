@@ -63,3 +63,4 @@ do
 done
 
 rm -rf $INSTALLATION_PATH
+echo "$(date -u): containers are up"

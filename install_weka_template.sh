@@ -2,6 +2,8 @@ INSTALLATION_PATH="/tmp/weka"
 mkdir -p $INSTALLATION_PATH
 cd $INSTALLATION_PATH
 
+echo "$(date -u): before weka agent installation"
+
 # install weka
 TOKEN=${get_weka_io_token}
 INSTALL_URL=https://$TOKEN@get.weka.io/dist/v1/install/${weka_version}/${weka_version}
@@ -18,3 +20,5 @@ if [[ "${install_weka_url}" ]]; then
   else
     retry 300 2 curl --fail --max-time 10 $INSTALL_URL | sh
 fi
+
+echo "$(date -u): weka agent installation complete"
