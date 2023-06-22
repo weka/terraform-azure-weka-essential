@@ -1,0 +1,117 @@
+name: Sanity Testing
+
+on:
+  pull_request:
+
+concurrency: ci
+
+env:
+  PREFIX: essential
+  RG_NAME: sanity
+  CLUSTER_NAME: wekatest
+  INSTANCE_TYPE: Standard_L8s_v3
+  GET_WEKA_IO_TOKEN: ${{ secrets.GET_WEKA_IO_TOKEN }}
+  SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  CLIENT_ID: ${{ secrets.CLIENT_ID }}
+  CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+  TENANT_ID: ${{ secrets.TENANT_ID }}
+  INITIAL_CAPACITY: 6
+  INITIALIZATION_TIMEOUT: 30
+  WEKA_USERNAME: ${{ secrets.WEKA_USERNAME }}
+  WEKA_PASSWORD: ${{ secrets.WEKA_PASSWORD }}
+
+jobs:
+  weka_essential_deployment_sanity_testing:
+    name: Test Weka Essential Deployment
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./examples/no_existing_network
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - id: auth
+        name: Authenticate to Azure Cloud
+        uses: azure/login@v1
+        with:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
+
+      - name: Create Azure resource group
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az group create --name $RG_NAME --location eastus
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Copy main.tf provider to example folder
+        run: cp "../../ci/deployment/main.tf" .
+
+      - name: Copy override provider to example folder
+        run: cp "../../ci/deployment/override.tf" .
+
+      - name: Add additional variables
+        run: cat ../../ci/deployment/additional_variables.tf >> variables.tf
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -var="prefix=$PREFIX" -var="rg_name=$RG_NAME" -var="cluster_name=$CLUSTER_NAME" -var="cluster_size=$INITIAL_CAPACITY" -var="instance_type=$INSTANCE_TYPE" -var="get_weka_io_token=$GET_WEKA_IO_TOKEN" -var="client_id=$CLIENT_ID" -var="tenant_id=$TENANT_ID" -var="client_secret=$CLIENT_SECRET" -var="subscription_id=$SUBSCRIPTION_ID" -auto-approve
+
+      - name: Terraform Output
+        id: tfoutput
+        # //[$'\t\r\n '] is required for tf_output below to cut off EOL chars
+        # because otherwise output is failed to be written into $GITHUB_OUTPUT because of wrong format.
+        # Kind of Github actions multiline processing issue.
+        # $(terraform output -json) produce not a json on the runner -> all '{' and '}' are replaced with '***' in output, so it doesn't make the life simplier
+        run: |
+          tf_output=$(terraform output)
+          echo "tf-out=${tf_output//[$'\t\r\n ']}" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+
+      - name: Setup SSH Agent To Install Dependencies
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r $GITHUB_WORKSPACE/ci/deployment/requirements.txt
+          pip list
+
+      - name: Wait for weka cluster and validate running cluster has expected amount of containers, drivers and processes
+        run: |
+          chmod +x $GITHUB_WORKSPACE/ci/deployment/test_sanity_weka_cluster.py
+          python $GITHUB_WORKSPACE/ci/deployment/test_sanity_weka_cluster.py
+        env:
+          TF_OUTPUT: ${{ steps.tfoutput.outputs.tf-out }}
+
+      - name: Terraform Destroy
+        if: always()
+        run: terraform destroy -var="prefix=$PREFIX" -var="rg_name=$RG_NAME" -var="cluster_name=$CLUSTER_NAME" -var="cluster_size=$INITIAL_CAPACITY" -var="instance_type=$INSTANCE_TYPE" -var="get_weka_io_token=$GET_WEKA_IO_TOKEN" -var="client_id=$CLIENT_ID" -var="tenant_id=$TENANT_ID" -var="client_secret=$CLIENT_SECRET" -var="subscription_id=$SUBSCRIPTION_ID" -auto-approve
+
+      - name: Delete Azure resource group
+        if: always()
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az group delete --name $RG_NAME --yes
+
+      - name: Logout from Azure Cloud
+        if: always()
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az logout
+            az cache purge
+            az account clear

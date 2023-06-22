@@ -2,3 +2,4 @@
 *terraform*
 vm_names
 private_ips
+*.DS_Store
