@@ -284,3 +284,14 @@ variable "mount_clients_dpdk" {
   default     = true
   description = "Mount weka clients in DPDK mode"
 }
+
+variable "subscription_id" {
+  type = string
+  description = "The subscription id for the deployment."
+}
+
+variable "use_network" {
+  type        = bool
+  default     = false
+  description = "Create custom role to allow read and use existing network"
+}
