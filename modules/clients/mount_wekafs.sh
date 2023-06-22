@@ -1,3 +1,5 @@
+echo "$(date -u): before weka agent installation"
+
 INSTALLATION_PATH="/tmp/weka"
 mkdir -p $INSTALLATION_PATH
 cd $INSTALLATION_PATH
@@ -19,6 +21,7 @@ function retry_weka_install {
   done
   [ $count -eq 0 ] && {
       echo "weka install failed after $retry_max attempts"
+      echo "$(date -u): weka install failed"
       return 1
   }
   chmod +x install_script.sh && ./install_script.sh
@@ -26,6 +29,8 @@ function retry_weka_install {
 }
 
 retry_weka_install
+
+echo "$(date -u): weka agent installation complete"
 
 FILESYSTEM_NAME=default # replace with a different filesystem at need
 MOUNT_POINT=/mnt/weka # replace with a different mount point at need
@@ -44,6 +49,7 @@ if [[ ${mount_clients_dpdk} == true ]]; then
   mount_command="mount -t wekafs $net -o num_cores=1 -o mgmt_ip=$eth0 $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
 fi
 
-retry 60 30 $mount_command
+retry 60 45 $mount_command
 
 rm -rf $INSTALLATION_PATH
+echo "$(date -u): wekafs mount complete"

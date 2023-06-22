@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ex
 
+echo "$(date -u): cloud-init beginning"
+
 # set apt private repo
 if [[ "${apt_repo_url}" != "" ]]; then
   mv /etc/apt/sources.list /etc/apt/sources.list.bak
@@ -79,6 +81,8 @@ systemctl start remove-routes.service
 systemctl status remove-routes.service || true # show status of remove-routes.service
 ip route # show routes after removing
 
+echo "$(date -u): routes configured"
+
 # remove installation path before installing weka
 rm -rf $INSTALLATION_PATH
 
@@ -137,6 +141,7 @@ function retry {
   done
   [ $count -eq 0 ] && {
       echo "Retry failed [$retry_max]: $*"
+      echo "$(date -u): retry failed"
       return 1
   }
   return 0
