@@ -16,7 +16,8 @@ provider "azurerm" {
 }
 
 module weka_deployment {
-  source            = "https://github.com/weka/terraform-azure-weka-essential.git"
+  source            = "weka/weka-essential/azure"
+  version           = "1.0.0"
   prefix            = "essential"
   rg_name           = "example"
   cluster_name      = "test"
