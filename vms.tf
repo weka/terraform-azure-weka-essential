@@ -93,9 +93,7 @@ locals {
 
   install_weka_script = templatefile(local.install_weka_script_path,
     {
-      get_weka_io_token = var.get_weka_io_token
-      weka_version      = var.weka_version
-      install_weka_url  = var.install_weka_url
+      install_weka_url  = var.install_weka_url != "" ? var.install_weka_url : "https://${var.get_weka_io_token}@get.weka.io/dist/v1/install/${var.weka_version}/${var.weka_version}"
   })
 
   deploy_script = templatefile("${path.module}/deploy.sh", {
