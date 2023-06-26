@@ -225,7 +225,7 @@ variable "apt_repo_url" {
 
 variable "install_weka_url" {
   type        = string
-  description = "The URL of the Weka release download tar file."
+  description = "The URL of the Weka release. Supports path to weka tar file or installation script."
   default     = ""
 }
 
