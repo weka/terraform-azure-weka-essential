@@ -68,7 +68,7 @@ resource "azurerm_network_interface" "client_nic" {
 }
 
 locals {
-  preparation_script = templatefile(var.preparation_template_file, {
+  preparation_script = templatefile("${path.module}/../../preparation.sh", {
     apt_repo_url     = var.apt_repo_url
     nics_num         = var.nics
     install_dpdk     = var.mount_clients_dpdk
