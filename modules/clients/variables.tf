@@ -62,11 +62,6 @@ variable "apt_repo_url" {
   description = "The URL of the apt private repository."
 }
 
-variable "preparation_template_file" {
-  type        = string
-  description = "preparation_template file path"
-}
-
 variable "mount_clients_dpdk" {
   type        = bool
   default     = true

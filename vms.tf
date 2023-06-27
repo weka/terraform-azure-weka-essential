@@ -17,7 +17,6 @@ module "clients" {
   clients_number            = var.clients_number
   apt_repo_url              = var.apt_repo_url
   mount_clients_dpdk        = var.mount_clients_dpdk
-  preparation_template_file = local.preparation_script_path
   subnet_name               = data.azurerm_subnet.subnet.name
   source_image_id           = var.source_image_id
   vnet_name                 = local.vnet_name
