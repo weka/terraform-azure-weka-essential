@@ -39,7 +39,6 @@ No modules.
 | <a name="input_nics"></a> [nics](#input\_nics) | Number of nics to set on each client vm | `number` | `2` | no |
 | <a name="input_nics_map"></a> [nics\_map](#input\_nics\_map) | n/a | `map(number)` | <pre>{<br>  "Standard_L16s_v3": 8,<br>  "Standard_L8s_v3": 4<br>}</pre> | no |
 | <a name="input_ppg_id"></a> [ppg\_id](#input\_ppg\_id) | Placement proximity group id. | `string` | n/a | yes |
-| <a name="input_preparation_template_file"></a> [preparation\_template\_file](#input\_preparation\_template\_file) | preparation\_template file path | `string` | n/a | yes |
 | <a name="input_rg_name"></a> [rg\_name](#input\_rg\_name) | A predefined resource group in the Azure subscription. | `string` | n/a | yes |
 | <a name="input_source_image_id"></a> [source\_image\_id](#input\_source\_image\_id) | Use weka custom image, ubuntu 20.04 with kernel 5.4 and ofed 5.8-1.1.2.1 | `string` | n/a | yes |
 | <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | The VM public key. If it is not set, the keys are auto-generated. | `string` | n/a | yes |
