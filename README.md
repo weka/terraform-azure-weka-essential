@@ -174,6 +174,7 @@ In the output you will get the cluster backends (and clients if you asked for) i
 |------|--------|---------|
 | <a name="module_clients"></a> [clients](#module\_clients) | ./modules/clients | n/a |
 | <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
+| <a name="module_protocol_gateways"></a> [protocol\_gateways](#module\_protocol\_gateways) | ./modules/protocol_gateways | n/a |
 
 ## Resources
 
@@ -225,6 +226,14 @@ In the output you will get the cluster backends (and clients if you asked for) i
 | <a name="input_placement_group_id"></a> [placement\_group\_id](#input\_placement\_group\_id) | Proximity placement group to use for the vmss. If not passed, will be created automatically. | `string` | `""` | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | The prefix for all the resource names. For example, the prefix for your system name. | `string` | `"weka"` | no |
 | <a name="input_protection_level"></a> [protection\_level](#input\_protection\_level) | Cluster data protection level. | `number` | `2` | no |
+| <a name="input_protocol"></a> [protocol](#input\_protocol) | Name of the protocol. | `string` | `"NFS"` | no |
+| <a name="input_protocol_gateway_disk_size"></a> [protocol\_gateway\_disk\_size](#input\_protocol\_gateway\_disk\_size) | The protocol gateways' default disk size. | `number` | `8` | no |
+| <a name="input_protocol_gateway_frontend_num"></a> [protocol\_gateway\_frontend\_num](#input\_protocol\_gateway\_frontend\_num) | The number of frontend cores on single protocol gateway machine. | `number` | `1` | no |
+| <a name="input_protocol_gateway_instance_type"></a> [protocol\_gateway\_instance\_type](#input\_protocol\_gateway\_instance\_type) | The protocol gateways' virtual machine type (sku) to deploy. | `string` | `"Standard_D8_v5"` | no |
+| <a name="input_protocol_gateway_nics_num"></a> [protocol\_gateway\_nics\_num](#input\_protocol\_gateway\_nics\_num) | The protocol gateways' NICs number. | `string` | `2` | no |
+| <a name="input_protocol_gateway_secondary_ips_per_nic"></a> [protocol\_gateway\_secondary\_ips\_per\_nic](#input\_protocol\_gateway\_secondary\_ips\_per\_nic) | Number of secondary IPs per single NIC per protocol gateway virtual machine. | `number` | `1` | no |
+| <a name="input_protocol_gateway_static_private_ips_list"></a> [protocol\_gateway\_static\_private\_ips\_list](#input\_protocol\_gateway\_static\_private\_ips\_list) | List of static private ips used for assigning secondary IPs to the protocol gateways' NICs. | `list(string)` | n/a | yes |
+| <a name="input_protocol_gateways_number"></a> [protocol\_gateways\_number](#input\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
 | <a name="input_rg_name"></a> [rg\_name](#input\_rg\_name) | A predefined resource group in the Azure subscription. | `string` | n/a | yes |
 | <a name="input_set_obs"></a> [set\_obs](#input\_set\_obs) | Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration. | `bool` | `false` | no |
 | <a name="input_source_image_id"></a> [source\_image\_id](#input\_source\_image\_id) | Use weka custom image, ubuntu 20.04 with kernel 5.4 and ofed 5.8-1.1.2.1 | `string` | `"/communityGalleries/WekaIO-d7d3f308-d5a1-4c45-8e8a-818aed57375a/images/ubuntu20.04/versions/latest"` | no |
@@ -247,4 +256,5 @@ In the output you will get the cluster backends (and clients if you asked for) i
 | <a name="output_backend_ips"></a> [backend\_ips](#output\_backend\_ips) | If 'assign\_public\_ip' is set to true, it will output backends public ips, otherwise private ips. |
 | <a name="output_client_ips"></a> [client\_ips](#output\_client\_ips) | If 'assign\_public\_ip' is set to true, it will output clients public ips, otherwise private ips. |
 | <a name="output_private_ssh_key"></a> [private\_ssh\_key](#output\_private\_ssh\_key) | private\_ssh\_key:  If 'ssh\_public\_key' is set to null, it will output the private ssh key location. |
+| <a name="output_protocol_gateway_ips"></a> [protocol\_gateway\_ips](#output\_protocol\_gateway\_ips) | If 'assign\_public\_ip' is set to true, it will output protocol gateway public ips, otherwise private ips. |
 <!-- END_TF_DOCS -->

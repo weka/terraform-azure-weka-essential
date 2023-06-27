@@ -27,6 +27,36 @@ module "clients" {
   ppg_id                    = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
   assign_public_ip          = var.assign_public_ip
   vnet_rg_name              = local.vnet_rg_name
+
+  depends_on = [azurerm_linux_virtual_machine.clusterizing, module.network]
+}
+
+module "protocol_gateways" {
+  count                      = var.protocol_gateways_number > 0 ? 1 : 0
+  source                     = "./modules/protocol_gateways"
+  rg_name                    = var.rg_name
+  subnet_name                = data.azurerm_subnet.subnet.name
+  source_image_id            = var.source_image_id
+  vnet_name                  = local.vnet_name
+  vnet_rg_name               = local.vnet_rg_name
+  tags_map                   = var.tags_map
+  gateways_number            = var.protocol_gateways_number
+  gateways_name             = "${var.prefix}-${var.cluster_name}-protocol-gateway"
+  protocol                   = var.protocol
+  nics                       = var.protocol_gateway_nics_num
+  secondary_ips_per_nic      = var.protocol_gateway_secondary_ips_per_nic
+  static_private_ips_list    = var.protocol_gateway_static_private_ips_list
+  backend_ips                = local.first_nic_private_ips
+  install_weka_url           = local.install_weka_url
+  instance_type              = var.protocol_gateway_instance_type
+  apt_repo_url               = var.apt_repo_url
+  vm_username                = var.vm_username
+  ssh_public_key             = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
+  ppg_id                     = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
+  assign_public_ip           = var.assign_public_ip
+  disk_size                  = var.protocol_gateway_disk_size
+  frontend_num               = var.protocol_gateway_frontend_num
+
   depends_on = [azurerm_linux_virtual_machine.clusterizing, module.network]
 }
 
@@ -75,24 +105,24 @@ locals {
   vms_computer_names    = [for i in range(var.cluster_size - 1) : "${var.prefix}-${var.cluster_name}-backend-${i}"]
   vnet_rg_name          = var.vnet_rg_name != "" ? var.vnet_rg_name : var.rg_name
   vnet_name             = var.vnet_name != "" ? var.vnet_name : module.network[0].vnet_name
+  install_weka_url      = var.install_weka_url != "" ? var.install_weka_url : "https://${var.get_weka_io_token}@get.weka.io/dist/v1/install/${var.weka_version}/${var.weka_version}"
 
   preparation_script_path  = "${path.module}/preparation.sh"
   install_weka_script_path = "${path.module}/install_weka_template.sh"
+  attach_disk_script_path = "${path.module}/attach_disk.sh"
 
   preparation_script = templatefile(local.preparation_script_path, {
     apt_repo_url     = var.apt_repo_url
     nics_num         = local.nics_numbers
-    install_dpdk     = var.install_cluster_dpdk
     subnet_range     = local.subnet_range
   })
 
-  attach_disk_script = templatefile("${path.module}/attach_disk.sh", {
+  attach_disk_script = templatefile(local.attach_disk_script_path, {
     disk_size = local.disk_size
   })
 
-  install_weka_script = templatefile(local.install_weka_script_path,
-    {
-      install_weka_url  = var.install_weka_url != "" ? var.install_weka_url : "https://${var.get_weka_io_token}@get.weka.io/dist/v1/install/${var.weka_version}/${var.weka_version}"
+  install_weka_script = templatefile(local.install_weka_script_path, {
+    install_weka_url = local.install_weka_url
   })
 
   deploy_script = templatefile("${path.module}/deploy.sh", {

@@ -20,6 +20,11 @@ output "client_ips" {
   description = "If 'assign_public_ip' is set to true, it will output clients public ips, otherwise private ips."
 }
 
+output "protocol_gateway_ips" {
+  value       = length(module.protocol_gateways) > 0 ? module.protocol_gateways.0.protocol_gateway_ips : null
+  description = "If 'assign_public_ip' is set to true, it will output protocol gateway public ips, otherwise private ips."
+}
+
 output "private_ssh_key" {
   value       = var.ssh_public_key == null ? local.ssh_private_key_path : null
   description = "private_ssh_key:  If 'ssh_public_key' is set to null, it will output the private ssh key location."
