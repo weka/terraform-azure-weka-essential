@@ -34,20 +34,17 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_apt_repo_url"></a> [apt\_repo\_url](#input\_apt\_repo\_url) | The URL of the apt private repository. | `string` | `""` | no |
 | <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Determines whether to assign public ip. | `bool` | `true` | no |
-| <a name="input_attach_disk_template_file"></a> [attach\_disk\_template\_file](#input\_attach\_disk\_template\_file) | attach\_disk file path | `string` | n/a | yes |
 | <a name="input_backend_ips"></a> [backend\_ips](#input\_backend\_ips) | IP addresses of the cluster servers. | `list(string)` | n/a | yes |
 | <a name="input_client_group_name"></a> [client\_group\_name](#input\_client\_group\_name) | Client access group name. | `string` | `"weka-cg"` | no |
 | <a name="input_disk_size"></a> [disk\_size](#input\_disk\_size) | The disk size. | `number` | n/a | yes |
 | <a name="input_frontend_num"></a> [frontend\_num](#input\_frontend\_num) | The number of frontend ionodes per instance. | `number` | `1` | no |
 | <a name="input_gateways_name"></a> [gateways\_name](#input\_gateways\_name) | The protocol group name. | `string` | n/a | yes |
 | <a name="input_gateways_number"></a> [gateways\_number](#input\_gateways\_number) | The number of virtual machines to deploy as protocol gateways. | `number` | n/a | yes |
-| <a name="input_install_weka_template_file"></a> [install\_weka\_template\_file](#input\_install\_weka\_template\_file) | install\_weka file path | `string` | n/a | yes |
 | <a name="input_install_weka_url"></a> [install\_weka\_url](#input\_install\_weka\_url) | The URL of the Weka release download tar file. | `string` | n/a | yes |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The virtual machine type (sku) to deploy. | `string` | n/a | yes |
 | <a name="input_interface_group_name"></a> [interface\_group\_name](#input\_interface\_group\_name) | Interface group name. | `string` | `"weka-ig"` | no |
 | <a name="input_nics"></a> [nics](#input\_nics) | Number of nics to set on each vm | `number` | `2` | no |
 | <a name="input_ppg_id"></a> [ppg\_id](#input\_ppg\_id) | Placement proximity group id. | `string` | n/a | yes |
-| <a name="input_preparation_template_file"></a> [preparation\_template\_file](#input\_preparation\_template\_file) | preparation\_template file path | `string` | n/a | yes |
 | <a name="input_protocol"></a> [protocol](#input\_protocol) | Name of the protocol. | `string` | `"NFS"` | no |
 | <a name="input_rg_name"></a> [rg\_name](#input\_rg\_name) | A predefined resource group in the Azure subscription. | `string` | n/a | yes |
 | <a name="input_secondary_ips_per_nic"></a> [secondary\_ips\_per\_nic](#input\_secondary\_ips\_per\_nic) | Number of secondary IPs per single NIC per protocol gateway virtual machine. | `number` | `1` | no |
