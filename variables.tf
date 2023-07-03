@@ -308,11 +308,6 @@ variable "protocol_gateway_secondary_ips_per_nic" {
   default     = 1
 }
 
-variable "protocol_gateway_static_private_ips_list" {
-  type = list(string)
-  description = "List of static private ips used for assigning secondary IPs to the protocol gateways' NICs."
-}
-
 variable "protocol_gateway_instance_type" {
   type        = string
   description = "The protocol gateways' virtual machine type (sku) to deploy."

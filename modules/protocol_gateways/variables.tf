@@ -25,11 +25,6 @@ variable "secondary_ips_per_nic" {
   default     = 1
 }
 
-variable "static_private_ips_list" {
-  type        = list(string)
-  description = "List of static private ips used for assigning secondary IPs to the protocol gateways' NICs."
-}
-
 variable "vnet_rg_name" {
   type        = string
   description = "Resource group name of vnet"
