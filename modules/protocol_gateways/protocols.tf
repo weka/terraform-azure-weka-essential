@@ -39,8 +39,7 @@ resource "azurerm_network_interface" "primary_gateway_nic_public" {
     content {
       name                          = "ipconfig${ip_configuration.value + 1}"
       subnet_id                     = data.azurerm_subnet.subnet.id
-      private_ip_address_allocation = "Static"
-      private_ip_address            = var.static_private_ips_list[ip_configuration.value + var.gateways_number * count.index]
+      private_ip_address_allocation = "Dynamic"
     }
   }
 }
@@ -65,8 +64,7 @@ resource "azurerm_network_interface" "primary_gateway_nic_private" {
     content {
       name                          = "ipconfig${ip_configuration.value + 1}"
       subnet_id                     = data.azurerm_subnet.subnet.id
-      private_ip_address_allocation = "Static"
-      private_ip_address            = var.static_private_ips_list[ip_configuration.value + var.gateways_number * count.index]
+      private_ip_address_allocation = "Dynamic"
     }
   }
 }
@@ -169,11 +167,6 @@ resource "azurerm_linux_virtual_machine" "vms" {
 
   lifecycle {
     ignore_changes = [tags]
-
-    precondition {
-      condition     = length(var.static_private_ips_list) >= var.nics * var.secondary_ips_per_nic * var.gateways_number
-      error_message = "The amount of static private ips in the list should not be less than required amount (after calculation)."
-    }
     precondition {
       condition     = var.protocol == "NFS" ? var.gateways_number >= 1 : var.gateways_number >= 3
       error_message = "The amount of protocol gateways should be at least 1 for NFS and 3 for SMB."

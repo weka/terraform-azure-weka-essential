@@ -45,7 +45,6 @@ module "protocol_gateways" {
   protocol                   = var.protocol
   nics                       = var.protocol_gateway_nics_num
   secondary_ips_per_nic      = var.protocol_gateway_secondary_ips_per_nic
-  static_private_ips_list    = var.protocol_gateway_static_private_ips_list
   backend_ips                = local.first_nic_private_ips
   install_weka_url           = local.install_weka_url
   instance_type              = var.protocol_gateway_instance_type
