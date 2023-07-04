@@ -55,6 +55,13 @@ resource "azurerm_linux_virtual_machine" "clusterizing" {
 }
 
 
+resource "azurerm_role_assignment" "clusterizing-vm-assignment" {
+  count                = var.set_obs ? 1 : 0
+  scope                = "${data.azurerm_storage_account.sa[0].id}/blobServices/default/containers/${var.obs_container_name}"
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_linux_virtual_machine.clusterizing.identity[0].principal_id
+  depends_on           = [azurerm_linux_virtual_machine.clusterizing]
+}
 
 resource "azurerm_managed_disk" "clusterize_disks" {
   name                 = "weka-disk-${var.prefix}-${var.cluster_name}-clusterize"

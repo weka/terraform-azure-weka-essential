@@ -195,6 +195,20 @@ resource "azurerm_linux_virtual_machine" "vms" {
   depends_on = [module.network, azurerm_proximity_placement_group.ppg]
 }
 
+data "azurerm_storage_account" "sa" {
+  count               = var.set_obs ? 1 : 0
+  name                = var.obs_name
+  resource_group_name = var.rg_name
+}
+
+resource "azurerm_role_assignment" "vms-assignment" {
+  count                = var.set_obs ? var.cluster_size - 1 : 0
+  scope                = "${data.azurerm_storage_account.sa[0].id}/blobServices/default/containers/${var.obs_container_name}"
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_linux_virtual_machine.vms[count.index].identity[0].principal_id
+  depends_on           = [azurerm_linux_virtual_machine.vms]
+}
+
 resource "azurerm_managed_disk" "vm_disks" {
   count                = var.cluster_size - 1
   name                 = "weka-disk-${var.prefix}-${var.cluster_name}-${count.index}"
