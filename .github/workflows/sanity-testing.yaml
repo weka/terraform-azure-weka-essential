@@ -45,7 +45,7 @@ jobs:
             az group create --name $RG_NAME --location eastus
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v2
 
       - name: Copy main.tf provider to example folder
         run: cp "../../ci/deployment/main.tf" .
@@ -64,13 +64,8 @@ jobs:
 
       - name: Terraform Output
         id: tfoutput
-        # //[$'\t\r\n '] is required for tf_output below to cut off EOL chars
-        # because otherwise output is failed to be written into $GITHUB_OUTPUT because of wrong format.
-        # Kind of Github actions multiline processing issue.
-        # $(terraform output -json) produce not a json on the runner -> all '{' and '}' are replaced with '***' in output, so it doesn't make the life simplier
-        run: |
-          tf_output=$(terraform output)
-          echo "tf-out=${tf_output//[$'\t\r\n ']}" >> "$GITHUB_OUTPUT"
+        run:
+          terraform output -json
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -94,7 +89,7 @@ jobs:
           chmod +x $GITHUB_WORKSPACE/ci/deployment/test_sanity_weka_cluster.py
           python $GITHUB_WORKSPACE/ci/deployment/test_sanity_weka_cluster.py
         env:
-          TF_OUTPUT: ${{ steps.tfoutput.outputs.tf-out }}
+          TF_OUTPUT: ${{ steps.tfoutput.outputs.stdout }}
 
       - name: Terraform Destroy
         if: always()
