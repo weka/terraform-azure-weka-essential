@@ -16,7 +16,8 @@ provider "azurerm" {
 }
 
 module weka_deployment {
-  source            = "https://github.com/weka/terraform-azure-weka-essential.git"
+  source            = "weka/weka-essential/azure"
+  version           = "1.0.0"
   prefix            = "essential"
   rg_name           = "example"
   cluster_name      = "test"
@@ -173,6 +174,7 @@ In the output you will get the cluster backends (and clients if you asked for) i
 |------|--------|---------|
 | <a name="module_clients"></a> [clients](#module\_clients) | ./modules/clients | n/a |
 | <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
+| <a name="module_protocol_gateways"></a> [protocol\_gateways](#module\_protocol\_gateways) | ./modules/protocol_gateways | n/a |
 
 ## Resources
 
@@ -187,6 +189,8 @@ In the output you will get the cluster backends (and clients if you asked for) i
 | [azurerm_network_interface.public_first_nic](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface) | resource |
 | [azurerm_proximity_placement_group.ppg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/proximity_placement_group) | resource |
 | [azurerm_public_ip.publicIp](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/public_ip) | resource |
+| [azurerm_role_assignment.clusterizing-vm-assignment](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
+| [azurerm_role_assignment.vms-assignment](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
 | [azurerm_virtual_machine_data_disk_attachment.clusterize_disk_attachment](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_data_disk_attachment) | resource |
 | [azurerm_virtual_machine_data_disk_attachment.vm_disk_attachment](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_data_disk_attachment) | resource |
 | [local_file.private_key](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file) | resource |
@@ -195,6 +199,7 @@ In the output you will get the cluster backends (and clients if you asked for) i
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
 | [azurerm_public_ip.public_ips](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/public_ip) | data source |
 | [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) | data source |
+| [azurerm_storage_account.sa](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/storage_account) | data source |
 | [azurerm_subnet.subnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
 
 ## Inputs
@@ -215,7 +220,7 @@ In the output you will get the cluster backends (and clients if you asked for) i
 | <a name="input_get_weka_io_token"></a> [get\_weka\_io\_token](#input\_get\_weka\_io\_token) | The token to download the Weka release from get.weka.io. | `string` | n/a | yes |
 | <a name="input_hotspare"></a> [hotspare](#input\_hotspare) | Hot-spare value. | `number` | `1` | no |
 | <a name="input_install_cluster_dpdk"></a> [install\_cluster\_dpdk](#input\_install\_cluster\_dpdk) | Install weka cluster with DPDK | `bool` | `true` | no |
-| <a name="input_install_weka_url"></a> [install\_weka\_url](#input\_install\_weka\_url) | The URL of the Weka release download tar file. | `string` | `""` | no |
+| <a name="input_install_weka_url"></a> [install\_weka\_url](#input\_install\_weka\_url) | The URL of the Weka release. Supports path to weka tar file or installation script. | `string` | `""` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The virtual machine type (sku) to deploy. | `string` | `"Standard_L8s_v3"` | no |
 | <a name="input_mount_clients_dpdk"></a> [mount\_clients\_dpdk](#input\_mount\_clients\_dpdk) | Mount weka clients in DPDK mode | `bool` | `true` | no |
 | <a name="input_obs_container_name"></a> [obs\_container\_name](#input\_obs\_container\_name) | Name of obs container name | `string` | `""` | no |
@@ -224,6 +229,13 @@ In the output you will get the cluster backends (and clients if you asked for) i
 | <a name="input_placement_group_id"></a> [placement\_group\_id](#input\_placement\_group\_id) | Proximity placement group to use for the vmss. If not passed, will be created automatically. | `string` | `""` | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | The prefix for all the resource names. For example, the prefix for your system name. | `string` | `"weka"` | no |
 | <a name="input_protection_level"></a> [protection\_level](#input\_protection\_level) | Cluster data protection level. | `number` | `2` | no |
+| <a name="input_protocol"></a> [protocol](#input\_protocol) | Name of the protocol. | `string` | `"NFS"` | no |
+| <a name="input_protocol_gateway_disk_size"></a> [protocol\_gateway\_disk\_size](#input\_protocol\_gateway\_disk\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
+| <a name="input_protocol_gateway_frontend_num"></a> [protocol\_gateway\_frontend\_num](#input\_protocol\_gateway\_frontend\_num) | The number of frontend cores on single protocol gateway machine. | `number` | `1` | no |
+| <a name="input_protocol_gateway_instance_type"></a> [protocol\_gateway\_instance\_type](#input\_protocol\_gateway\_instance\_type) | The protocol gateways' virtual machine type (sku) to deploy. | `string` | `"Standard_D8_v5"` | no |
+| <a name="input_protocol_gateway_nics_num"></a> [protocol\_gateway\_nics\_num](#input\_protocol\_gateway\_nics\_num) | The protocol gateways' NICs number. | `string` | `2` | no |
+| <a name="input_protocol_gateway_secondary_ips_per_nic"></a> [protocol\_gateway\_secondary\_ips\_per\_nic](#input\_protocol\_gateway\_secondary\_ips\_per\_nic) | Number of secondary IPs per single NIC per protocol gateway virtual machine. | `number` | `1` | no |
+| <a name="input_protocol_gateways_number"></a> [protocol\_gateways\_number](#input\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
 | <a name="input_rg_name"></a> [rg\_name](#input\_rg\_name) | A predefined resource group in the Azure subscription. | `string` | n/a | yes |
 | <a name="input_set_obs"></a> [set\_obs](#input\_set\_obs) | Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration. | `bool` | `false` | no |
 | <a name="input_source_image_id"></a> [source\_image\_id](#input\_source\_image\_id) | Use weka custom image, ubuntu 20.04 with kernel 5.4 and ofed 5.8-1.1.2.1 | `string` | `"/communityGalleries/WekaIO-d7d3f308-d5a1-4c45-8e8a-818aed57375a/images/ubuntu20.04/versions/latest"` | no |
@@ -246,4 +258,5 @@ In the output you will get the cluster backends (and clients if you asked for) i
 | <a name="output_backend_ips"></a> [backend\_ips](#output\_backend\_ips) | If 'assign\_public\_ip' is set to true, it will output backends public ips, otherwise private ips. |
 | <a name="output_client_ips"></a> [client\_ips](#output\_client\_ips) | If 'assign\_public\_ip' is set to true, it will output clients public ips, otherwise private ips. |
 | <a name="output_private_ssh_key"></a> [private\_ssh\_key](#output\_private\_ssh\_key) | private\_ssh\_key:  If 'ssh\_public\_key' is set to null, it will output the private ssh key location. |
+| <a name="output_protocol_gateway_ips"></a> [protocol\_gateway\_ips](#output\_protocol\_gateway\_ips) | If 'assign\_public\_ip' is set to true, it will output protocol gateway public ips, otherwise private ips. |
 <!-- END_TF_DOCS -->

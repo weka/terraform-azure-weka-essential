@@ -54,7 +54,7 @@ locals {
 
 resource "azurerm_network_interface" "client_nic" {
   count                         = local.secondary_nics_num
-  name                          = "${var.clients_name}-nic-${count.index + var.clients_number}"
+  name                          = "${var.clients_name}-secondary-nic-${count.index + var.clients_number}"
   location                      = data.azurerm_resource_group.rg.location
   resource_group_name           = var.rg_name
   enable_accelerated_networking = var.mount_clients_dpdk
@@ -68,10 +68,9 @@ resource "azurerm_network_interface" "client_nic" {
 }
 
 locals {
-  preparation_script = templatefile(var.preparation_template_file, {
+  preparation_script = templatefile("${path.module}/../../preparation.sh", {
     apt_repo_url     = var.apt_repo_url
     nics_num         = var.nics
-    install_dpdk     = var.mount_clients_dpdk
     subnet_range     = data.azurerm_subnet.subnet.address_prefix
   })
 

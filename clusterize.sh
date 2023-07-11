@@ -28,6 +28,8 @@ done
 host_ips=$(IFS=, ;echo "$${HOST_IPS[*]}")
 host_names=$(IFS=' ' ;echo "$${HOST_NAMES[*]}")
 
+echo "$(date -u): start clusterization"
+
 vms_string=$(printf "%s "  "$${VMS[@]}" | rev | cut -c2- | rev)
 while ! weka cluster create $host_names --host-ips $host_ips
 do
@@ -42,6 +44,7 @@ weka debug override add --key allow_azure_auto_detection
 fi
 
 sleep 30s
+echo "$(date -u): adding drives"
 
 DRIVE_NUMS=( $(weka cluster container | grep drives | awk '{print $1;}') )
 
@@ -66,6 +69,7 @@ weka cluster hot-spare $HOTSPARE
 weka cluster start-io
 
 sleep 15s
+echo "$(date -u): after start-io"
 
 weka cluster process
 weka cluster drive
@@ -94,4 +98,5 @@ else
 	weka alerts mute UdpModePerformanceWarning 365d
 fi
 
+echo "$(date -u): clusterization complete"
 echo "completed successfully" > /tmp/weka_clusterization_completion_validation
