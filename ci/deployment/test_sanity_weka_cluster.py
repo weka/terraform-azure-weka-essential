@@ -1,5 +1,5 @@
 import os
-import re
+import json
 import time
 
 from weka_rest_api_client.api import API
@@ -7,10 +7,9 @@ from weka_rest_api_client.errors import NoAvailableHosts, BadGatewayError, RestC
 
 
 def parse_ips_from_tf_output():
-    pattern = r"((([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])[ (\[]?(\.|dot)[ )\]]?){3}" \
-              r"([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5]))"
-    ips = list(set([match[0] for match in re.findall(pattern, os.getenv('TF_OUTPUT'))]))
-    print(f"IPs -> {ips}")
+    output = os.getenv('TF_OUTPUT')
+    ips = json.loads(output)['weka_deployment_output']['value']['backend_ips']
+    print("IPs -> {}\n".format(ips))
     return ips
 
 
