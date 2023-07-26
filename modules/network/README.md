@@ -32,6 +32,7 @@ No modules.
 | <a name="input_address_space"></a> [address\_space](#input\_address\_space) | The range of IP addresses the virtual network uses. | `string` | n/a | yes |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | The prefix for all the resource names. For example, the prefix for your system name. | `string` | `"weka"` | no |
 | <a name="input_rg_name"></a> [rg\_name](#input\_rg\_name) | A predefined resource group in the Azure subscription for creating the vnet in. | `string` | n/a | yes |
+| <a name="input_sg_ssh_range"></a> [sg\_ssh\_range](#input\_sg\_ssh\_range) | A list of IP addresses that can use ssh connection with a public network deployment. | `list(string)` | `[]` | no |
 | <a name="input_subnet_prefix"></a> [subnet\_prefix](#input\_subnet\_prefix) | Address prefix to use for the subnet. | `string` | n/a | yes |
 | <a name="input_tags_map"></a> [tags\_map](#input\_tags\_map) | A map of tags to assign the same metadata to all resources in the environment. Format: key:value. | `map(string)` | <pre>{<br>  "weka_deployment": "azure-essential"<br>}</pre> | no |
 
