@@ -13,6 +13,7 @@ module "weka_deployment" {
   instance_type     = "Standard_L8s_v3"
   cluster_size      = 6
   get_weka_io_token = "..."
+  sg_ssh_range      = ["0.0.0.0/0"]
 }
 
 output "weka_deployment_output" {
