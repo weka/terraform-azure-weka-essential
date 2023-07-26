@@ -331,3 +331,9 @@ variable "protocol_gateway_frontend_num" {
   default     = 1
   description = "The number of frontend cores on single protocol gateway machine."
 }
+
+variable "sg_ssh_range" {
+  type        = list(string)
+  description = "A list of IP addresses that can use ssh connection with a public network deployment."
+  default = []
+}

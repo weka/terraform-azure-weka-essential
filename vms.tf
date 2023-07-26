@@ -7,6 +7,7 @@ module "network" {
   rg_name       = local.vnet_rg_name
   address_space = var.address_space
   subnet_prefix = var.subnet_prefix
+  sg_ssh_range  = var.sg_ssh_range
 }
 
 module "clients" {

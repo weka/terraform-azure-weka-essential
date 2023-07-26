@@ -28,6 +28,7 @@ resource "azurerm_subnet" "subnet" {
 
 # ====================== sg ssh ========================== #
 resource "azurerm_network_security_rule" "sg_public_ssh" {
+  count                       = length(var.sg_ssh_range) > 0 ? 1 : 0
   name                        = "${var.prefix}-ssh-sg"
   resource_group_name         = data.azurerm_resource_group.rg.name
   priority                    = "1000"
@@ -36,7 +37,7 @@ resource "azurerm_network_security_rule" "sg_public_ssh" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefixes     = ["0.0.0.0/0"]
+  source_address_prefixes     = var.sg_ssh_range
   destination_address_prefix  = "*"
   network_security_group_name = azurerm_network_security_group.sg.name
 }
