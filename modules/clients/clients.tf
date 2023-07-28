@@ -111,6 +111,7 @@ resource "azurerm_linux_virtual_machine" "vms" {
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "StandardSSD_LRS"
+    name                 = "os-disk-${var.clients_name}-${count.index}"
   }
 
   identity {
