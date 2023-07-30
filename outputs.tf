@@ -25,6 +25,11 @@ output "protocol_gateway_ips" {
   description = "If 'assign_public_ip' is set to true, it will output protocol gateway public ips, otherwise private ips."
 }
 
+output "ssh_user" {
+  value = var.vm_username
+  description = "ssh user for weka cluster"
+}
+
 output "private_ssh_key" {
   value       = var.ssh_public_key == null ? local.ssh_private_key_path : null
   description = "private_ssh_key:  If 'ssh_public_key' is set to null, it will output the private ssh key location."
