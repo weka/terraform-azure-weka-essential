@@ -260,4 +260,5 @@ In the output you will get the cluster backends (and clients if you asked for) i
 | <a name="output_client_ips"></a> [client\_ips](#output\_client\_ips) | If 'assign\_public\_ip' is set to true, it will output clients public ips, otherwise private ips. |
 | <a name="output_private_ssh_key"></a> [private\_ssh\_key](#output\_private\_ssh\_key) | private\_ssh\_key:  If 'ssh\_public\_key' is set to null, it will output the private ssh key location. |
 | <a name="output_protocol_gateway_ips"></a> [protocol\_gateway\_ips](#output\_protocol\_gateway\_ips) | If 'assign\_public\_ip' is set to true, it will output protocol gateway public ips, otherwise private ips. |
+| <a name="output_ssh_user"></a> [ssh\_user](#output\_ssh\_user) | ssh user for weka cluster |
 <!-- END_TF_DOCS -->
