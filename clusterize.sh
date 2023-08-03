@@ -12,6 +12,7 @@ STRIPE_WIDTH=${stripe_width}
 PROTECTION_LEVEL=${protection_level}
 HOTSPARE=${hotspare}
 INSTALL_DPDK=${install_dpdk}
+SMBW_ENABLED=${smbw_enabled}
 SET_OBS=${set_obs}
 
 CONTAINER_NAMES=(drives0 compute0 frontend0)
@@ -75,8 +76,12 @@ weka cluster process
 weka cluster drive
 weka cluster container
 
-full_capacity=$(weka status -J | jq .capacity.unprovisioned_bytes)
 weka fs group create default
+# for SMBW setup we need to create a separate fs with 10GB capacity
+if [[ $SMBW_ENABLED == true ]]; then
+  weka fs create .config_fs default 10GB
+fi
+full_capacity=$(weka status -J | jq .capacity.unprovisioned_bytes)
 weka fs create default default "$full_capacity"B
 
 if [[ ${set_obs} == true ]]; then
