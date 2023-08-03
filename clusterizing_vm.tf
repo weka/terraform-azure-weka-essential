@@ -16,6 +16,7 @@ locals {
     obs_name            = var.obs_name
     obs_container_name  = var.obs_container_name
     blob_obs_access_key = var.blob_obs_access_key
+    smbw_enabled        = var.smbw_enabled
   })
 }
 

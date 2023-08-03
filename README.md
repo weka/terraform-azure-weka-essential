@@ -143,6 +143,38 @@ In order to mount clients in udp mode you should pass the following param (in ad
 ```hcl
 mount_clients_dpdk = false
 ```
+
+## Protocol gateways
+We allow creating protocol gateway instances (stateful clients) for NFS / SMB protocols support.
+
+To create protocol gateway instances you need to set the number of such instances (by default the number is 0):
+```hcl
+protocol_gateways_number = 3
+```
+You can also provide Azure instance type which will be used for gateway instances:
+```hcl
+protocol_gateway_instance_type = "Standard_D8_v5"
+```
+By default the **NFS** protocol will be configured on the gateway instances.  
+NFS setup requires at least 1 instance.
+
+To configure **SMB / SMBW** instead, you need to set the variables:
+```hcl
+protocol_gateways_number = 3
+protocol                 = "SMB"
+smbw_enabled             = true  // in case of SMB-W setup
+smb_domain_name          = "qa.wekatest.io"
+smb_dns_ip_address       = "10.3.0.4"  // optional
+```
+To join an SMB cluster in Active Directory, you can provide these optional variables (create the AD server first):
+```hcl
+smb_domain_username      = "myuser"
+smb_domain_password      = "Myuser@12345"
+```
+The command which uses these variables looks like this:
+`weka smb domain join <smb_domain_username> <smb_domain_password> [--server smb_server_name]`.  
+Minimal number of instances required for SMB is 3.
+
 ## Weka custom image
 As you can see via `source_image_id` variable, we use our own custom image.
 This is a community image that we created and uploaded to azure.
@@ -239,6 +271,14 @@ In the output you will get the cluster backends (and clients if you asked for) i
 | <a name="input_rg_name"></a> [rg\_name](#input\_rg\_name) | A predefined resource group in the Azure subscription. | `string` | n/a | yes |
 | <a name="input_set_obs"></a> [set\_obs](#input\_set\_obs) | Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration. | `bool` | `false` | no |
 | <a name="input_sg_ssh_range"></a> [sg\_ssh\_range](#input\_sg\_ssh\_range) | A list of IP addresses that can use ssh connection with a public network deployment. | `list(string)` | `[]` | no |
+| <a name="input_smb_cluster_name"></a> [smb\_cluster\_name](#input\_smb\_cluster\_name) | The name of the SMB setup. | `string` | `"Weka-SMB"` | no |
+| <a name="input_smb_dns_ip_address"></a> [smb\_dns\_ip\_address](#input\_smb\_dns\_ip\_address) | DNS IP address. If provided, will be added to /etc/resolved.conf to use this dns address for name resolution. | `string` | `""` | no |
+| <a name="input_smb_domain_name"></a> [smb\_domain\_name](#input\_smb\_domain\_name) | The domain to join the SMB cluster to. | `string` | `""` | no |
+| <a name="input_smb_domain_netbios_name"></a> [smb\_domain\_netbios\_name](#input\_smb\_domain\_netbios\_name) | The domain NetBIOS name of the SMB cluster. | `string` | `""` | no |
+| <a name="input_smb_domain_password"></a> [smb\_domain\_password](#input\_smb\_domain\_password) | The SMB domain password. | `string` | `""` | no |
+| <a name="input_smb_domain_username"></a> [smb\_domain\_username](#input\_smb\_domain\_username) | The SMB domain username. | `string` | `""` | no |
+| <a name="input_smb_share_name"></a> [smb\_share\_name](#input\_smb\_share\_name) | The name of the SMB share | `string` | `"default"` | no |
+| <a name="input_smbw_enabled"></a> [smbw\_enabled](#input\_smbw\_enabled) | Enable SMBW protocol. This option should be provided before cluster is created to leave extra capacity for SMBW setup. | `bool` | `false` | no |
 | <a name="input_source_image_id"></a> [source\_image\_id](#input\_source\_image\_id) | Use weka custom image, ubuntu 20.04 with kernel 5.4 and ofed 5.8-1.1.2.1 | `string` | `"/communityGalleries/WekaIO-d7d3f308-d5a1-4c45-8e8a-818aed57375a/images/ubuntu20.04/versions/latest"` | no |
 | <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | Ssh public key to pass to vms. | `string` | `null` | no |
 | <a name="input_stripe_width"></a> [stripe\_width](#input\_stripe\_width) | Stripe width = cluster\_size - protection\_level - 1 (by default). | `number` | `-1` | no |

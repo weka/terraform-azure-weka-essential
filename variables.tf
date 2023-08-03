@@ -332,6 +332,59 @@ variable "protocol_gateway_frontend_num" {
   description = "The number of frontend cores on single protocol gateway machine."
 }
 
+variable "smbw_enabled" {
+  type        = bool
+  default     = false
+  description = "Enable SMBW protocol. This option should be provided before cluster is created to leave extra capacity for SMBW setup."
+}
+
+variable "smb_cluster_name" {
+  type        = string
+  description = "The name of the SMB setup."
+  default     = "Weka-SMB"
+
+  validation {
+    condition     = length(var.smb_cluster_name) > 0
+    error_message = "The SMB cluster name cannot be empty."
+  }
+}
+
+variable "smb_domain_name" {
+  type        = string
+  description = "The domain to join the SMB cluster to."
+  default     = ""
+}
+
+variable "smb_domain_netbios_name" {
+  type        = string
+  description = "The domain NetBIOS name of the SMB cluster."
+  default     = ""
+}
+
+variable "smb_domain_username" {
+  type        = string
+  description = "The SMB domain username."
+  default     = ""
+}
+
+variable "smb_domain_password" {
+  type        = string
+  description = "The SMB domain password."
+  default     = ""
+}
+
+variable "smb_dns_ip_address" {
+  type        = string
+  description = "DNS IP address. If provided, will be added to /etc/resolved.conf to use this dns address for name resolution."
+  default     = ""
+}
+
+variable "smb_share_name" {
+  type       = string
+  description = "The name of the SMB share"
+  default     = "default"
+}
+
 variable "sg_ssh_range" {
   type        = list(string)
   description = "A list of IP addresses that can use ssh connection with a public network deployment."

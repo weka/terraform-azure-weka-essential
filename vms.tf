@@ -56,6 +56,14 @@ module "protocol_gateways" {
   assign_public_ip           = var.assign_public_ip
   disk_size                  = var.protocol_gateway_disk_size
   frontend_num               = var.protocol_gateway_frontend_num
+  smbw_enabled               = var.smbw_enabled
+  smb_cluster_name           = var.smb_cluster_name
+  smb_domain_name            = var.smb_domain_name
+  smb_domain_netbios_name    = var.smb_domain_netbios_name
+  smb_domain_username        = var.smb_domain_username
+  smb_domain_password        = var.smb_domain_password
+  smb_dns_ip_address         = var.smb_dns_ip_address
+  smb_share_name             = var.smb_share_name
 
   depends_on = [azurerm_linux_virtual_machine.clusterizing, module.network]
 }
