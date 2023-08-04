@@ -11,17 +11,17 @@ data "azurerm_public_ip" "public_ips" {
 }
 
 output "backend_ips" {
-  value       = var.assign_public_ip ? data.azurerm_public_ip.public_ips.*.ip_address : local.first_nic_private_ips
+  value       = flatten(var.assign_public_ip ? data.azurerm_public_ip.public_ips.*.ip_address : local.first_nic_private_ips)
   description = "If 'assign_public_ip' is set to true, it will output backends public ips, otherwise private ips."
 }
 
 output "client_ips" {
-  value       = length(module.clients) > 0 ? module.clients.0.client-ips : null
+  value       = length(module.clients) > 0 ? flatten(module.clients.0.client-ips) : null
   description = "If 'assign_public_ip' is set to true, it will output clients public ips, otherwise private ips."
 }
 
 output "protocol_gateway_ips" {
-  value       = length(module.protocol_gateways) > 0 ? module.protocol_gateways.0.protocol_gateway_ips : null
+  value       = length(module.protocol_gateways) > 0 ? flatten(module.protocol_gateways.0.protocol_gateway_ips) : null
   description = "If 'assign_public_ip' is set to true, it will output protocol gateway public ips, otherwise private ips."
 }
 
