@@ -337,3 +337,9 @@ variable "sg_ssh_range" {
   description = "A list of IP addresses that can use ssh connection with a public network deployment."
   default = []
 }
+
+variable "zone"{
+    type        = string
+    description = "The zone in which the resources should be created."
+    default     = "1"
+}

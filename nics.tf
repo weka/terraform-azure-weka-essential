@@ -3,7 +3,9 @@ resource "azurerm_public_ip" "publicIp" {
   name                = "publicIp-${var.prefix}-${var.cluster_name}-${count.index}"
   resource_group_name = var.rg_name
   location            = data.azurerm_resource_group.rg.location
-  allocation_method   = "Dynamic"
+  zones               = [var.zone]
+  allocation_method   = "Static"
+  sku                 = "Standard"
 }
 
 resource "azurerm_network_interface" "public_first_nic" {
