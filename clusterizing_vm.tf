@@ -1,11 +1,13 @@
 locals {
-  clusterize_script = templatefile("${path.module}/clusterize.sh", {
+  stripe_width_calculated = var.cluster_size - var.protection_level - 1
+  stripe_width            = local.stripe_width_calculated < 16 ? local.stripe_width_calculated : 16
+  clusterize_script       = templatefile("${path.module}/clusterize.sh", {
     vm_names            = join(" ", local.vms_computer_names)
     private_ips         = join(" ", slice(local.first_nic_private_ips, 0, var.cluster_size - 1))
     cluster_name        = var.cluster_name
     cluster_size        = var.cluster_size
     nvmes_num           = var.container_number_map[var.instance_type].nvme
-    stripe_width        = var.stripe_width
+    stripe_width        = var.stripe_width != -1 ? var.stripe_width : local.stripe_width
     protection_level    = var.protection_level
     hotspare            = var.hotspare
     install_dpdk        = var.install_cluster_dpdk
