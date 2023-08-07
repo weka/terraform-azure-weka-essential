@@ -163,6 +163,7 @@ resource "azurerm_linux_virtual_machine" "vms" {
   count                        = var.cluster_size - 1
   name                         = "${var.prefix}-${var.cluster_name}-${count.index}"
   location                     = data.azurerm_resource_group.rg.location
+  zone                         = var.zone
   resource_group_name          = var.rg_name
   size                         = var.instance_type
   admin_username               = var.vm_username
@@ -179,7 +180,7 @@ resource "azurerm_linux_virtual_machine" "vms" {
   os_disk {
     caching              = "ReadWrite"
     name                 = "os-disk-${var.prefix}-${var.cluster_name}-${count.index}"
-    storage_account_type = "Standard_LRS"
+    storage_account_type = "Premium_LRS"
   }
 
   admin_ssh_key {
@@ -214,8 +215,9 @@ resource "azurerm_managed_disk" "vm_disks" {
   count                = var.cluster_size - 1
   name                 = "weka-disk-${var.prefix}-${var.cluster_name}-${count.index}"
   location             = data.azurerm_resource_group.rg.location
+  zone                 = var.zone
   resource_group_name  = var.rg_name
-  storage_account_type = "Standard_LRS"
+  storage_account_type = "PremiumV2_LRS"
   create_option        = "Empty"
   disk_size_gb         = local.disk_size
 }
@@ -225,6 +227,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "vm_disk_attachment" {
   managed_disk_id    = azurerm_managed_disk.vm_disks[count.index].id
   virtual_machine_id = azurerm_linux_virtual_machine.vms[count.index].id
   lun                = 0
-  caching            = "ReadWrite"
+  caching            = "None"
   depends_on         = [azurerm_linux_virtual_machine.vms]
 }

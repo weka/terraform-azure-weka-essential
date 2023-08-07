@@ -153,7 +153,7 @@ resource "azurerm_linux_virtual_machine" "vms" {
   os_disk {
     caching              = "ReadWrite"
     name                 = "os-disk-${var.gateways_name}-${count.index}"
-    storage_account_type = "Standard_LRS"
+    storage_account_type = "StandardSSD_LRS"
   }
 
   admin_ssh_key {
@@ -179,7 +179,7 @@ resource "azurerm_managed_disk" "vm_disks" {
   name                 = "weka-disk-${var.gateways_name}-${count.index}"
   location             = data.azurerm_resource_group.rg.location
   resource_group_name  = var.rg_name
-  storage_account_type = "Standard_LRS"
+  storage_account_type = "StandardSSD_LRS"
   create_option        = "Empty"
   disk_size_gb         = local.disk_size
 }

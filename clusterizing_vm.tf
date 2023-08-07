@@ -22,6 +22,7 @@ locals {
 resource "azurerm_linux_virtual_machine" "clusterizing" {
   name                            = "${var.prefix}-${var.cluster_name}-clusterizing"
   location                        = data.azurerm_resource_group.rg.location
+  zone                            = var.zone
   resource_group_name             = var.rg_name
   size                            = var.instance_type
   admin_username                  = var.vm_username
@@ -38,7 +39,7 @@ resource "azurerm_linux_virtual_machine" "clusterizing" {
   os_disk {
     caching              = "ReadWrite"
     name                 = "clusterizing-os-disk-${var.prefix}-${var.cluster_name}-${var.cluster_size - 1}"
-    storage_account_type = "Standard_LRS"
+    storage_account_type = "Premium_LRS"
   }
 
   admin_ssh_key {
@@ -68,8 +69,9 @@ resource "azurerm_role_assignment" "clusterizing-vm-assignment" {
 resource "azurerm_managed_disk" "clusterize_disks" {
   name                 = "weka-disk-${var.prefix}-${var.cluster_name}-clusterize"
   location             = data.azurerm_resource_group.rg.location
+  zone                 = var.zone
   resource_group_name  = var.rg_name
-  storage_account_type = "Standard_LRS"
+  storage_account_type = "PremiumV2_LRS"
   create_option        = "Empty"
   disk_size_gb         = local.disk_size
 }
@@ -78,6 +80,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "clusterize_disk_attachm
   managed_disk_id    = azurerm_managed_disk.clusterize_disks.id
   virtual_machine_id = azurerm_linux_virtual_machine.clusterizing.id
   lun                = 0
-  caching            = "ReadWrite"
+  caching            = "None"
   depends_on         = [azurerm_linux_virtual_machine.clusterizing]
 }
