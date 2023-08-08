@@ -332,6 +332,18 @@ variable "protocol_gateway_frontend_num" {
   description = "The number of frontend cores on single protocol gateway machine."
 }
 
+variable "allow_ssh_ranges" {
+  type        = list(string)
+  description = "Allow port 22, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
+  default     = []
+}
+
+variable "allow_weka_api_ranges" {
+  type        = list(string)
+  description = "Allow port 14000, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
+  default     = []
+}
+
 variable "smbw_enabled" {
   type        = bool
   default     = false
@@ -383,12 +395,6 @@ variable "smb_share_name" {
   type       = string
   description = "The name of the SMB share"
   default     = "default"
-}
-
-variable "sg_ssh_range" {
-  type        = list(string)
-  description = "A list of IP addresses that can use ssh connection with a public network deployment."
-  default = []
 }
 
 variable "zone"{

@@ -25,8 +25,14 @@ variable "tags_map" {
   description = "A map of tags to assign the same metadata to all resources in the environment. Format: key:value."
 }
 
-variable "sg_ssh_range" {
+variable "allow_ssh_ranges" {
   type        = list(string)
-  description = "A list of IP addresses that can use ssh connection with a public network deployment."
-  default = []
+  description = "Allow port 22, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
+  default     = []
+}
+
+variable "allow_weka_api_ranges" {
+  type        = list(string)
+  description = "Allow port 14000, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
+  default     = []
 }
