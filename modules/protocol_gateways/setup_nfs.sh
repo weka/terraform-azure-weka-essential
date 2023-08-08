@@ -10,6 +10,23 @@ function create_interface_group() {
   echo "$(date -u): interface group ${interface_group_name} created"
 }
 
+function wait_for_weka_fs(){
+  filesystem_name="default"
+  max_retries=30 # 30 * 10 = 5 minutes
+  for (( i=0; i < max_retries; i++ )); do
+    if [ "$(weka fs | grep -c $filesystem_name)" -ge 1 ]; then
+      echo "$(date -u): weka filesystem $filesystem_name is up"
+      break
+    fi
+    echo "$(date -u): waiting for weka filesystem $filesystem_name to be up"
+    sleep 10
+  done
+  if (( i > max_retries )); then
+      echo "$(date -u): timeout: weka filesystem $filesystem_name is not up after $max_retries attempts."
+      return 1
+  fi
+}
+
 function create_client_group() {
   if weka nfs client-group | grep ${client_group_name}; then
     echo "$(date -u): client group ${client_group_name} already exists"
@@ -18,6 +35,7 @@ function create_client_group() {
   echo "$(date -u): creating client group"
   weka nfs client-group add ${client_group_name}
   weka nfs rules add dns ${client_group_name} *
+  wait_for_weka_fs || return 1
   weka nfs permission add default ${client_group_name}
   echo "$(date -u): client group ${client_group_name} created"
 }
