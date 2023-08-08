@@ -17,7 +17,7 @@ provider "azurerm" {
 
 module weka_deployment {
   source            = "weka/weka-essential/azure"
-  version           = "1.0.2"
+  version           = "1.0.3"
   prefix            = "essential"
   rg_name           = "example"
   cluster_name      = "test"
