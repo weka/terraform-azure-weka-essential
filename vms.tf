@@ -1,13 +1,14 @@
 data "azurerm_client_config" "current" {}
 
 module "network" {
-  count         = var.subnet == "" ? 1 : 0
-  source        = "./modules/network"
-  prefix        = var.prefix
-  rg_name       = local.vnet_rg_name
-  address_space = var.address_space
-  subnet_prefix = var.subnet_prefix
-  sg_ssh_range  = var.sg_ssh_range
+  count                 = var.subnet == "" ? 1 : 0
+  source                = "./modules/network"
+  prefix                = var.prefix
+  rg_name               = local.vnet_rg_name
+  address_space         = var.address_space
+  subnet_prefix         = var.subnet_prefix
+  allow_weka_api_ranges = var.allow_weka_api_ranges
+  allow_ssh_ranges      = var.allow_ssh_ranges
 }
 
 module "clients" {
