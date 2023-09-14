@@ -25,7 +25,7 @@ module weka_deployment {
   cluster_size      = 6
   get_weka_io_token = "..."
   vnet_name         = "essential-vnet"
-  subnet            = "essential-subnet"
+  subnet_name       = "essential-subnet"
 }
 
 output "weka_deployment_output" {
@@ -56,7 +56,7 @@ This weka deployment can use existing network, or create network resources (vmet
 <br>**Example**:
 ```hcl
 vnet_name           = "essential-vnet"
-subnet              = "essential-subnet"
+subnet_name         = "essential-subnet"
 ```
 **If you don't pass these params, we will automatically create the network resources.**
 ### Weka deployment using existing network full example:
@@ -71,7 +71,7 @@ module "weka_deployment" {
   cluster_size      = 6
   get_weka_io_token = "..."
   vnet_name         = "essential-vnet"
-  subnet            = "essential-subnet"
+  subnet_name       = "essential-subnet"
 }
 ```
 

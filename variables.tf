@@ -33,7 +33,7 @@ variable "vnet_name" {
   default     = ""
 }
 
-variable "subnet" {
+variable "subnet_name" {
   type        = string
   description = "The subnet name."
   default     = ""
