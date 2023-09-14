@@ -1,7 +1,7 @@
 data "azurerm_client_config" "current" {}
 
 module "network" {
-  count                 = var.subnet == "" ? 1 : 0
+  count                 = var.subnet_name == "" ? 1 : 0
   source                = "./modules/network"
   prefix                = var.prefix
   rg_name               = local.vnet_rg_name
@@ -76,7 +76,7 @@ data "azurerm_resource_group" "rg" {
 data "azurerm_subnet" "subnet" {
   resource_group_name  = local.vnet_rg_name
   virtual_network_name = local.vnet_name
-  name                 = var.subnet != "" ? var.subnet : module.network[0].subnet_name
+  name                 = var.subnet_name != "" ? var.subnet_name : module.network[0].subnet_name
   depends_on           = [module.network]
 }
 

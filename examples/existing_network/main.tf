@@ -14,7 +14,7 @@ module "weka_deployment" {
   cluster_size      = 6
   get_weka_io_token = "..."
   vnet_name         = "essential-vnet"
-  subnet            = "essential-subnet"
+  subnet_name       = "essential-subnet"
 }
 
 output "weka_deployment_output" {
