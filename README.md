@@ -166,14 +166,11 @@ smbw_enabled             = true  // in case of SMB-W setup
 smb_domain_name          = "qa.wekatest.io"
 smb_dns_ip_address       = "10.3.0.4"  // optional
 ```
-To join an SMB cluster in Active Directory, you can provide these optional variables (create the AD server first):
-```hcl
-smb_domain_username      = "myuser"
-smb_domain_password      = "Myuser@12345"
-```
-The command which uses these variables looks like this:
+To join an SMB cluster in Active Directory, need to run manually command:
+
 `weka smb domain join <smb_domain_username> <smb_domain_password> [--server smb_server_name]`.  
-Minimal number of instances required for SMB is 3.
+
+</br>Minimal number of instances required for SMB is 3.
 
 ## Weka custom image
 As you can see via `source_image_id` variable, we use our own custom image.

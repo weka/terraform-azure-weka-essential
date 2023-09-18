@@ -61,8 +61,6 @@ module "protocol_gateways" {
   smb_cluster_name           = var.smb_cluster_name
   smb_domain_name            = var.smb_domain_name
   smb_domain_netbios_name    = var.smb_domain_netbios_name
-  smb_domain_username        = var.smb_domain_username
-  smb_domain_password        = var.smb_domain_password
   smb_dns_ip_address         = var.smb_dns_ip_address
   smb_share_name             = var.smb_share_name
 

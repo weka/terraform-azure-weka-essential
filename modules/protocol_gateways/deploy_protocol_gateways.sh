@@ -49,7 +49,7 @@ ready_containers=0
 while [ $ready_containers -ne 1 ];
 do
   sleep 10
-  ready_containers=$( weka local ps | grep -i 'running' | wc -l )
+  ready_containers=$( weka local ps | grep frontend0 | grep -i 'running' | wc -l )
   echo "Running containers: $ready_containers"
 done
 
