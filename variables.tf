@@ -373,18 +373,6 @@ variable "smb_domain_netbios_name" {
   default     = ""
 }
 
-variable "smb_domain_username" {
-  type        = string
-  description = "The SMB domain username."
-  default     = ""
-}
-
-variable "smb_domain_password" {
-  type        = string
-  description = "The SMB domain password."
-  default     = ""
-}
-
 variable "smb_dns_ip_address" {
   type        = string
   description = "DNS IP address. If provided, will be added to /etc/resolved.conf to use this dns address for name resolution."
