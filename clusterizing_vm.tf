@@ -18,6 +18,7 @@ locals {
     blob_obs_access_key = var.blob_obs_access_key
     smbw_enabled        = var.smbw_enabled
     add_frontend        = var.add_frontend_container
+    weka_home_url       = var.weka_home_url
   })
 }
 

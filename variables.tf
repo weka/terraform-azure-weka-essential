@@ -396,3 +396,9 @@ variable "zone" {
   description = "The zone in which the resources should be created."
   default     = "1"
 }
+
+variable "weka_home_url" {
+  type        = string
+  description = "Weka Home url"
+  default     = ""
+}
