@@ -14,9 +14,15 @@ HOTSPARE=${hotspare}
 INSTALL_DPDK=${install_dpdk}
 SMBW_ENABLED=${smbw_enabled}
 SET_OBS=${set_obs}
+ADD_FRONTEND=${add_frontend}
 
-CONTAINER_NAMES=(drives0 compute0 frontend0)
-PORTS=(14000 15000 16000)
+CONTAINER_NAMES=(drives0 compute0)
+PORTS=(14000 15000)
+
+if [[ $ADD_FRONTEND == true ]]; then
+  CONTAINER_NAMES+=(frontend0)
+  PORTS+=(16000)
+fi
 
 HOST_IPS=()
 HOST_NAMES=()

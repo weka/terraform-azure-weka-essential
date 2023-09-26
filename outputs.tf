@@ -26,7 +26,7 @@ output "protocol_gateway_ips" {
 }
 
 output "ssh_user" {
-  value = var.vm_username
+  value       = var.vm_username
   description = "ssh user for weka cluster"
 }
 

@@ -17,6 +17,7 @@ locals {
     obs_container_name  = var.obs_container_name
     blob_obs_access_key = var.blob_obs_access_key
     smbw_enabled        = var.smbw_enabled
+    add_frontend        = var.add_frontend_container
   })
 }
 
@@ -34,8 +35,8 @@ resource "azurerm_linux_virtual_machine" "clusterizing" {
     local.install_weka_script, local.deploy_script, local.clusterize_script
   ]))
   proximity_placement_group_id    = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
-  network_interface_ids           = concat([local.first_nic_ids[var.cluster_size - 1]], slice(azurerm_network_interface.private_nics.*.id, ( local.nics_numbers - 1 )* (var.cluster_size - 1), (local.nics_numbers - 1) * var.cluster_size))
-  tags                            = merge(var.tags_map,{"weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id })
+  network_interface_ids           = concat([local.first_nic_ids[var.cluster_size - 1]], slice(azurerm_network_interface.private_nics.*.id, (local.nics_numbers - 1) * (var.cluster_size - 1), (local.nics_numbers - 1) * var.cluster_size))
+  tags                            = merge(var.tags_map, { "weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id })
   source_image_id                 = var.source_image_id
   os_disk {
     caching              = "ReadWrite"
@@ -45,7 +46,7 @@ resource "azurerm_linux_virtual_machine" "clusterizing" {
 
   admin_ssh_key {
     public_key = local.public_ssh_key
-    username     = var.vm_username
+    username   = var.vm_username
   }
 
   identity {
