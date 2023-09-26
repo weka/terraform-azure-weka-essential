@@ -15,6 +15,7 @@ INSTALL_DPDK=${install_dpdk}
 SMBW_ENABLED=${smbw_enabled}
 SET_OBS=${set_obs}
 ADD_FRONTEND=${add_frontend}
+WEKA_HOME_URL=${weka_home_url}
 
 CONTAINER_NAMES=(drives0 compute0)
 PORTS=(14000 15000)
@@ -67,7 +68,11 @@ done
 
 weka cluster update --cluster-name="$CLUSTER_NAME"
 
-weka cloud enable || true # skipping required for private network
+cloud_url_option=""
+if [ -n "$WEKA_HOME_URL" ]; then
+  cloud_url_option="--cloud-url $WEKA_HOME_URL"
+fi
+weka cloud enable $cloud_url_option || true # skipping required for private network
 
 if [ "$STRIPE_WIDTH" -gt 0 ] && [ "$PROTECTION_LEVEL" -gt 0 ]; then
 	weka cluster update --data-drives $STRIPE_WIDTH --parity-drives $PROTECTION_LEVEL
