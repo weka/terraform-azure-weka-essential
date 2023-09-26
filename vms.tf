@@ -195,7 +195,7 @@ resource "azurerm_linux_virtual_machine" "vms" {
   }
 
   lifecycle {
-    ignore_changes = [tags]
+    ignore_changes = [custom_data, tags, network_interface_ids]
   }
   depends_on = [module.network, azurerm_proximity_placement_group.ppg]
 }

@@ -55,7 +55,7 @@ resource "azurerm_linux_virtual_machine" "clusterizing" {
   }
 
   lifecycle {
-    ignore_changes = [tags]
+    ignore_changes = all
   }
   depends_on = [module.network, azurerm_proximity_placement_group.ppg, azurerm_linux_virtual_machine.vms]
 }

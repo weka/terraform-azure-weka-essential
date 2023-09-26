@@ -21,6 +21,9 @@ resource "azurerm_network_interface" "public_first_nic" {
     primary                       = true
     public_ip_address_id          = azurerm_public_ip.publicIp[count.index].id
   }
+  lifecycle {
+    ignore_changes = [ip_configuration, tags, name]
+  }
 }
 
 resource "azurerm_network_interface" "private_first_nic" {
@@ -35,6 +38,9 @@ resource "azurerm_network_interface" "private_first_nic" {
     private_ip_address_allocation = "Dynamic"
     primary                       = true
   }
+  lifecycle {
+    ignore_changes = [ip_configuration, tags]
+  }
 }
 
 resource "azurerm_network_interface" "private_nics" {
@@ -47,5 +53,8 @@ resource "azurerm_network_interface" "private_nics" {
     name                          = "ipconfig${count.index + var.cluster_size}"
     subnet_id                     = data.azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
+  }
+  lifecycle {
+    ignore_changes = [ip_configuration, tags, name]
   }
 }
