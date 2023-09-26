@@ -51,7 +51,7 @@ variable "subnet_prefix" {
     Prefix to use subnet.
     Relevant only for network creation mode, where subnet wasn't supplied.
   EOF
-  default = "10.0.0.0/24"
+  default     = "10.0.0.0/24"
 }
 
 variable "cluster_size" {
@@ -120,7 +120,7 @@ variable "container_number_map" {
     frontend = number
     nvme     = number
     nics     = number
-    memory   = string
+    memory   = list(string)
   }))
   description = "Maps the number of objects and memory size per machine type."
   default = {
@@ -130,7 +130,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 1
       nics     = 4
-      memory   = "31GB"
+      memory   = ["33GB", "31GB"]
     },
     Standard_L16s_v3 = {
       compute  = 4
@@ -138,7 +138,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 2
       nics     = 8
-      memory   = "72GB"
+      memory   = ["79GB", "72GB"]
     },
     Standard_L32s_v3 = {
       compute  = 4
@@ -146,7 +146,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 4
       nics     = 8
-      memory   = "189GB"
+      memory   = ["197GB", "189GB"]
     },
     Standard_L48s_v3 = {
       compute  = 3
@@ -154,7 +154,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 6
       nics     = 8
-      memory   = "306GB"
+      memory   = ["314GB", "306GB"]
     },
     Standard_L64s_v3 = {
       compute  = 4
@@ -162,7 +162,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 8
       nics     = 8
-      memory   = "418GB"
+      memory   = ["357GB", "418GB"]
     }
   }
 }
@@ -209,6 +209,12 @@ variable "install_cluster_dpdk" {
   type        = bool
   default     = true
   description = "Install weka cluster with DPDK"
+}
+
+variable "add_frontend_container" {
+  type        = bool
+  default     = true
+  description = "Create cluster with FE containers"
 }
 
 variable "placement_group_id" {
@@ -286,15 +292,15 @@ variable "mount_clients_dpdk" {
 }
 
 variable "protocol_gateways_number" {
-  type = number
+  type        = number
   description = "The number of protocol gateway virtual machines to deploy."
   default     = 0
 }
 
 variable "protocol" {
-  type    = string
+  type        = string
   description = "Name of the protocol."
-  default = "NFS"
+  default     = "NFS"
 
   validation {
     condition     = contains(["NFS", "SMB"], var.protocol)
@@ -380,13 +386,13 @@ variable "smb_dns_ip_address" {
 }
 
 variable "smb_share_name" {
-  type       = string
+  type        = string
   description = "The name of the SMB share"
   default     = "default"
 }
 
-variable "zone"{
-    type        = string
-    description = "The zone in which the resources should be created."
-    default     = "1"
+variable "zone" {
+  type        = string
+  description = "The zone in which the resources should be created."
+  default     = "1"
 }

@@ -39,23 +39,33 @@ get_core_ids $NUM_DRIVE_CONTAINERS drive_core_ids
 get_core_ids $NUM_COMPUTE_CONTAINERS compute_core_ids
 get_core_ids $NUM_FRONTEND_CONTAINERS frontend_core_ids
 
+total_containers=2
+
 if [[ $INSTALL_DPDK == true ]]; then
-  getNetStrForDpdk 1 $(($NUM_DRIVE_CONTAINERS+1)) "$GATEWAYS" "$SUBNETS"
+  getNetStrForDpdk 1 $(($NUM_DRIVE_CONTAINERS+1)) "$GATEWAYS"
   sudo weka local setup container --name drives0 --base-port 14000 --cores $NUM_DRIVE_CONTAINERS --no-frontends --drives-dedicated-cores $NUM_DRIVE_CONTAINERS --failure-domain $FAILURE_DOMAIN --core-ids $drive_core_ids $net --dedicate
-  getNetStrForDpdk $((1+$NUM_DRIVE_CONTAINERS)) $((1+$NUM_DRIVE_CONTAINERS+$NUM_COMPUTE_CONTAINERS )) "$GATEWAYS" "$SUBNETS"
+  getNetStrForDpdk $((1+$NUM_DRIVE_CONTAINERS)) $((1+$NUM_DRIVE_CONTAINERS+$NUM_COMPUTE_CONTAINERS )) "$GATEWAYS"
   sudo weka local setup container --name compute0 --base-port 15000 --cores $NUM_COMPUTE_CONTAINERS --no-frontends --compute-dedicated-cores $NUM_COMPUTE_CONTAINERS  --memory $COMPUTE_MEMORY --failure-domain $FAILURE_DOMAIN --core-ids $compute_core_ids $net --dedicate
-  getNetStrForDpdk $(($NICS_NUM-1)) $(($NICS_NUM)) "$GATEWAYS" "$SUBNETS"
-  sudo weka local setup container --name frontend0 --base-port 16000 --cores $NUM_FRONTEND_CONTAINERS --frontend-dedicated-cores $NUM_FRONTEND_CONTAINERS --allow-protocols true --failure-domain $FAILURE_DOMAIN --core-ids $frontend_core_ids $net --dedicate
 else
   sudo weka local setup container --name drives0 --base-port 14000 --cores $NUM_DRIVE_CONTAINERS --no-frontends --drives-dedicated-cores $NUM_DRIVE_CONTAINERS --failure-domain $FAILURE_DOMAIN --core-ids $drive_core_ids  --dedicate
   sudo weka local setup container --name compute0 --base-port 15000 --cores $NUM_COMPUTE_CONTAINERS --no-frontends --compute-dedicated-cores $NUM_COMPUTE_CONTAINERS  --memory $COMPUTE_MEMORY --failure-domain $FAILURE_DOMAIN --core-ids $compute_core_ids  --dedicate
-  sudo weka local setup container --name frontend0 --base-port 16000 --cores $NUM_FRONTEND_CONTAINERS --frontend-dedicated-cores $NUM_FRONTEND_CONTAINERS --allow-protocols true --failure-domain $FAILURE_DOMAIN --core-ids $frontend_core_ids  --dedicate
+fi
+
+if [[ $NUM_FRONTEND_CONTAINERS -gt 0 ]]; then
+  total_containers=3
+  get_core_ids $NUM_FRONTEND_CONTAINERS frontend_core_ids
+  if [[ $INSTALL_DPDK == true ]]; then
+    getNetStrForDpdk $(($NICS_NUM-1)) $(($NICS_NUM)) "$GATEWAYS"
+    sudo weka local setup container --name frontend0 --base-port 16000 --cores $NUM_FRONTEND_CONTAINERS --frontend-dedicated-cores $NUM_FRONTEND_CONTAINERS --allow-protocols true --failure-domain $FAILURE_DOMAIN --core-ids $frontend_core_ids $net --dedicate
+  else
+    sudo weka local setup container --name frontend0 --base-port 16000 --cores $NUM_FRONTEND_CONTAINERS --frontend-dedicated-cores $NUM_FRONTEND_CONTAINERS --allow-protocols true --failure-domain $FAILURE_DOMAIN --core-ids $frontend_core_ids  --dedicate
+  fi
 fi
 
 
-# should not call 'clusterize' untill all 3 containers are up
+# should not call 'clusterize' until all 2/3 containers are up
 ready_containers=0
-while [ $ready_containers -ne 3 ];
+while [[ $ready_containers -ne $total_containers ]];
 do
   sleep 10
   ready_containers=$( weka local ps | grep -i 'running' | wc -l )

@@ -12,57 +12,57 @@ module "network" {
 }
 
 module "clients" {
-  count                     = var.clients_number > 0 ? 1 : 0
-  source                    = "./modules/clients"
-  rg_name                   = var.rg_name
-  clients_name              = "${var.prefix}-${var.cluster_name}-client"
-  clients_number            = var.clients_number
-  apt_repo_url              = var.apt_repo_url
-  mount_clients_dpdk        = var.mount_clients_dpdk
-  subnet_name               = data.azurerm_subnet.subnet.name
-  source_image_id           = var.source_image_id
-  vnet_name                 = local.vnet_name
-  nics                      = var.mount_clients_dpdk ? var.client_nics_num : 1
-  instance_type             = var.client_instance_type
-  backend_ips               = local.first_nic_private_ips
-  ssh_public_key            = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
-  ppg_id                    = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
-  assign_public_ip          = var.assign_public_ip
-  vnet_rg_name              = local.vnet_rg_name
+  count              = var.clients_number > 0 ? 1 : 0
+  source             = "./modules/clients"
+  rg_name            = var.rg_name
+  clients_name       = "${var.prefix}-${var.cluster_name}-client"
+  clients_number     = var.clients_number
+  apt_repo_url       = var.apt_repo_url
+  mount_clients_dpdk = var.mount_clients_dpdk
+  subnet_name        = data.azurerm_subnet.subnet.name
+  source_image_id    = var.source_image_id
+  vnet_name          = local.vnet_name
+  nics               = var.mount_clients_dpdk ? var.client_nics_num : 1
+  instance_type      = var.client_instance_type
+  backend_ips        = local.first_nic_private_ips
+  ssh_public_key     = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
+  ppg_id             = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
+  assign_public_ip   = var.assign_public_ip
+  vnet_rg_name       = local.vnet_rg_name
 
   depends_on = [azurerm_linux_virtual_machine.clusterizing, module.network]
 }
 
 module "protocol_gateways" {
-  count                      = var.protocol_gateways_number > 0 ? 1 : 0
-  source                     = "./modules/protocol_gateways"
-  rg_name                    = var.rg_name
-  subnet_name                = data.azurerm_subnet.subnet.name
-  source_image_id            = var.source_image_id
-  vnet_name                  = local.vnet_name
-  vnet_rg_name               = local.vnet_rg_name
-  tags_map                   = var.tags_map
-  gateways_number            = var.protocol_gateways_number
-  gateways_name             = "${var.prefix}-${var.cluster_name}-protocol-gateway"
-  protocol                   = var.protocol
-  nics                       = var.protocol_gateway_nics_num
-  secondary_ips_per_nic      = var.protocol_gateway_secondary_ips_per_nic
-  backend_ips                = local.first_nic_private_ips
-  install_weka_url           = local.install_weka_url
-  instance_type              = var.protocol_gateway_instance_type
-  apt_repo_url               = var.apt_repo_url
-  vm_username                = var.vm_username
-  ssh_public_key             = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
-  ppg_id                     = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
-  assign_public_ip           = var.assign_public_ip
-  disk_size                  = var.protocol_gateway_disk_size
-  frontend_num               = var.protocol_gateway_frontend_num
-  smbw_enabled               = var.smbw_enabled
-  smb_cluster_name           = var.smb_cluster_name
-  smb_domain_name            = var.smb_domain_name
-  smb_domain_netbios_name    = var.smb_domain_netbios_name
-  smb_dns_ip_address         = var.smb_dns_ip_address
-  smb_share_name             = var.smb_share_name
+  count                   = var.protocol_gateways_number > 0 ? 1 : 0
+  source                  = "./modules/protocol_gateways"
+  rg_name                 = var.rg_name
+  subnet_name             = data.azurerm_subnet.subnet.name
+  source_image_id         = var.source_image_id
+  vnet_name               = local.vnet_name
+  vnet_rg_name            = local.vnet_rg_name
+  tags_map                = var.tags_map
+  gateways_number         = var.protocol_gateways_number
+  gateways_name           = "${var.prefix}-${var.cluster_name}-protocol-gateway"
+  protocol                = var.protocol
+  nics                    = var.protocol_gateway_nics_num
+  secondary_ips_per_nic   = var.protocol_gateway_secondary_ips_per_nic
+  backend_ips             = local.first_nic_private_ips
+  install_weka_url        = local.install_weka_url
+  instance_type           = var.protocol_gateway_instance_type
+  apt_repo_url            = var.apt_repo_url
+  vm_username             = var.vm_username
+  ssh_public_key          = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
+  ppg_id                  = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
+  assign_public_ip        = var.assign_public_ip
+  disk_size               = var.protocol_gateway_disk_size
+  frontend_num            = var.protocol_gateway_frontend_num
+  smbw_enabled            = var.smbw_enabled
+  smb_cluster_name        = var.smb_cluster_name
+  smb_domain_name         = var.smb_domain_name
+  smb_domain_netbios_name = var.smb_domain_netbios_name
+  smb_dns_ip_address      = var.smb_dns_ip_address
+  smb_share_name          = var.smb_share_name
 
   depends_on = [azurerm_linux_virtual_machine.clusterizing, module.network]
 }
@@ -116,12 +116,14 @@ locals {
 
   preparation_script_path  = "${path.module}/preparation.sh"
   install_weka_script_path = "${path.module}/install_weka_template.sh"
-  attach_disk_script_path = "${path.module}/attach_disk.sh"
+  attach_disk_script_path  = "${path.module}/attach_disk.sh"
+
+  get_compute_memory_index = var.add_frontend_container ? 1 : 0
 
   preparation_script = templatefile(local.preparation_script_path, {
-    apt_repo_url     = var.apt_repo_url
-    nics_num         = local.nics_numbers
-    subnet_range     = local.subnet_range
+    apt_repo_url = var.apt_repo_url
+    nics_num     = local.nics_numbers
+    subnet_range = local.subnet_range
   })
 
   attach_disk_script = templatefile(local.attach_disk_script_path, {
@@ -133,16 +135,10 @@ locals {
   })
 
   deploy_script = templatefile("${path.module}/deploy.sh", {
-    memory = var.container_number_map[var.instance_type].memory
-    compute_num = var.container_number_map[
-      var.instance_type
-    ].compute
-    frontend_num = var.container_number_map[
-      var.instance_type
-    ].frontend
-    drive_num = var.container_number_map[
-      var.instance_type
-    ].drive
+    memory          = var.container_number_map[var.instance_type].memory[local.get_compute_memory_index]
+    compute_num     = var.add_frontend_container == false ? var.container_number_map[var.instance_type].compute + 1 : var.container_number_map[var.instance_type].compute
+    frontend_num    = var.add_frontend_container == false ? 0 : var.container_number_map[var.instance_type].frontend
+    drive_num       = var.container_number_map[var.instance_type].drive
     nics_num        = local.nics_numbers
     install_dpdk    = var.install_cluster_dpdk
     subnet_prefixes = data.azurerm_subnet.subnet.address_prefix
