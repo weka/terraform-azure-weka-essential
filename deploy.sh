@@ -37,7 +37,6 @@ weka local rm default --force
 # weka containers setup
 get_core_ids $NUM_DRIVE_CONTAINERS drive_core_ids
 get_core_ids $NUM_COMPUTE_CONTAINERS compute_core_ids
-get_core_ids $NUM_FRONTEND_CONTAINERS frontend_core_ids
 
 total_containers=2
 
