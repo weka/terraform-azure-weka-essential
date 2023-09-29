@@ -111,10 +111,10 @@ locals {
     frontend_container_cores_num = var.frontend_container_cores_num
     subnet_prefixes              = data.azurerm_subnet.subnet.address_prefix
     backend_ips                  = join(",", var.backend_ips)
+    gateways_name                = var.gateways_name
   })
 
   setup_nfs_protocol_script = templatefile("${path.module}/setup_nfs.sh", {
-    gateways_name        = var.gateways_name
     interface_group_name = var.interface_group_name
     client_group_name    = var.client_group_name
   })
