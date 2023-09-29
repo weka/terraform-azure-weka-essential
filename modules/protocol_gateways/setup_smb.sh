@@ -1,6 +1,9 @@
 echo "$(date -u): running smb script"
 weka local ps
 
+all_secondary_ips=(${secondary_ips})
+echo "$(date -u): all_secondary_ips: $${all_secondary_ips[@]}"
+
 function wait_for_weka_fs(){
   filesystem_name="default"
   max_retries=30 # 30 * 10 = 5 minutes
@@ -17,6 +20,44 @@ function wait_for_weka_fs(){
       return 1
   fi
 }
+
+function create_config_fs(){
+  filesystem_name=".config_fs"
+  size="10GB"
+
+  if [ "$(weka fs | grep -c $filesystem_name)" -ge 1 ]; then
+    echo "$(date -u): weka filesystem $filesystem_name exists"
+    return 0
+  fi
+
+  echo "$(date -u): trying to create filesystem $filesystem_name"
+  output=$(weka fs create $filesystem_name default $size 2>&1)
+  # possiible outputs:
+  # FSId: 1 (means success)
+  # error: The given filesystem ".config_fs" already exists.
+  # error: Not enough available drive capacity for filesystem. requested "10.00 GB", but only "0 B" are free
+  if [ $? -eq 0 ]; then
+    echo "$(date -u): weka filesystem $filesystem_name is created"
+    return 0
+  fi
+
+  if [[ $output == *"already exists"* ]]; then
+    echo "$(date -u): weka filesystem $filesystem_name already exists"
+    break
+  elif [[ $output == *"Not enough available drive capacity for filesystem"* ]]; then
+    echo "$(date -u): Not enough available drive capacity for filesystem $filesystem_name for size $size"
+    return 1
+  else
+    echo "$(date -u): output: $output"
+    echo "$(date -u): cannot create weka filesystem $filesystem_name"
+    return 1
+  fi
+}
+
+if [[ ${smbw_enabled} == true ]]; then
+  wait_for_weka_fs || exit 1
+  create_config_fs || exit 1
+fi
 
 # make sure weka cluster is already up
 max_retries=60
@@ -105,15 +146,33 @@ if [[ ${smbw_enabled} == true ]]; then
     smbw_cmd_extention="--smbw --config-fs-name .config_fs"
 fi
 
-weka smb cluster create ${cluster_name} ${domain_name} $smbw_cmd_extention --container-ids $all_container_ids_str
-weka smb cluster wait
+# get all secondary ips separated by comma
+secondary_ips_str=$(IFS=,; printf "%s" "$${all_secondary_ips[*]}")
 
+function create_smb_cluster {
+  cluster_create_output=$(weka smb cluster create ${cluster_name} ${domain_name} $smbw_cmd_extention --container-ids $all_container_ids_str --smb-ips-pool $secondary_ips_str 2>&1)
+
+  if [ $? -eq 0 ]; then
+    echo "$(date -u): SMB cluster is created"
+    return 0
+  elif [[ $cluster_create_output == *"Cluster is already configured"* ]]; then
+    echo "$(date -u): SMB cluster is already configured"
+    weka smb cluster status
+    return 0
+  else
+    echo "$(date -u): $cluster_create_output"
+    return 1
+  fi
+}
+
+create_smb_cluster || exit 1
+
+weka smb cluster wait
 
 # add an SMB share if share_name is not empty
 # 'default' is the fs-name of weka file system created during clusterization
 if [ -n "${share_name}" ]; then
-    wait_for_weka_fs || return 1
-    weka smb share add ${share_name} default
+    weka smb share add ${share_name} default || true
 fi
 
 weka smb cluster status
