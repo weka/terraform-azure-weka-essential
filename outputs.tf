@@ -16,7 +16,7 @@ output "backend_ips" {
 }
 
 output "client_ips" {
-  value       = length(module.clients) > 0 ? flatten(module.clients.0.client-ips) : null
+  value       = length(module.clients) > 0 ? flatten(module.clients.0.client_ips) : null
   description = "If 'assign_public_ip' is set to true, it will output clients public ips, otherwise private ips."
 }
 
