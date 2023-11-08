@@ -113,7 +113,8 @@ variable "assign_public_ip" {
   description = "Determines whether to assign public ip."
 }
 
-variable "container_number_map" {
+variable "containers_config_map" {
+  # NOTE: compute = nics-drive-frontend-1
   type = map(object({
     compute  = number
     drive    = number
@@ -122,7 +123,7 @@ variable "container_number_map" {
     nics     = number
     memory   = list(string)
   }))
-  description = "Maps the number of objects and memory size per machine type."
+  description = "Maps the number of cores (per container type) and memory size per machine type."
   default = {
     Standard_L8s_v3 = {
       compute  = 1
@@ -166,7 +167,7 @@ variable "container_number_map" {
     }
   }
   validation {
-    condition = alltrue([for m in flatten([for i in values(var.container_number_map): (flatten(i.memory))]): tonumber(trimsuffix(m, "GB")) <= 384])
+    condition = alltrue([for m in flatten([for i in values(var.containers_config_map): (flatten(i.memory))]): tonumber(trimsuffix(m, "GB")) <= 384])
     error_message = "Compute memory can not be more then 384GB"
   }
 }

@@ -6,7 +6,7 @@ locals {
     private_ips         = join(" ", slice(local.first_nic_private_ips, 0, var.cluster_size - 1))
     cluster_name        = var.cluster_name
     cluster_size        = var.cluster_size
-    nvmes_num           = var.container_number_map[var.instance_type].nvme
+    nvmes_num           = var.containers_config_map[var.instance_type].nvme
     stripe_width        = var.stripe_width != -1 ? var.stripe_width : local.stripe_width
     protection_level    = var.protection_level
     hotspare            = var.hotspare

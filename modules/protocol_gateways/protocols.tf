@@ -111,7 +111,6 @@ locals {
     frontend_num    = var.frontend_num
     subnet_prefixes = data.azurerm_subnet.subnet.address_prefix
     backend_ips     = join(",", var.backend_ips)
-    nics_num        = var.nics
   })
 
   setup_nfs_protocol_script = templatefile("${path.module}/setup_nfs.sh", {
@@ -188,6 +187,10 @@ resource "azurerm_linux_virtual_machine" "vms" {
     precondition {
       condition     = var.protocol == "SMB" ? var.secondary_ips_per_nic <= 3 : true
       error_message = "The number of secondary IPs per single NIC per protocol gateway virtual machine must be at most 3 for SMB."
+    }
+    precondition {
+      condition = var.frontend_num < var.nics
+      error_message = "The number of frontends must be less than the number of NICs."
     }
   }
 }
