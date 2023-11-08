@@ -104,9 +104,9 @@ locals {
   ssh_public_key_path   = "${local.ssh_path}-public-key.pub"
   ssh_private_key_path  = "${local.ssh_path}-private-key.pem"
   public_ssh_key        = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
-  disk_size             = var.default_disk_size + var.traces_per_ionode * (var.container_number_map[var.instance_type].compute + var.container_number_map[var.instance_type].drive + var.container_number_map[var.instance_type].frontend)
+  disk_size             = var.default_disk_size + var.traces_per_ionode * (var.containers_config_map[var.instance_type].compute + var.containers_config_map[var.instance_type].drive + var.containers_config_map[var.instance_type].frontend)
   subnet_range          = data.azurerm_subnet.subnet.address_prefix
-  nics_numbers          = var.install_cluster_dpdk ? var.container_number_map[var.instance_type].nics : 1
+  nics_numbers          = var.install_cluster_dpdk ? var.containers_config_map[var.instance_type].nics : 1
   first_nic_ids         = var.assign_public_ip ? azurerm_network_interface.public_first_nic.*.id : azurerm_network_interface.private_first_nic.*.id
   first_nic_private_ips = var.assign_public_ip ? azurerm_network_interface.public_first_nic.*.private_ip_address : azurerm_network_interface.private_first_nic.*.private_ip_address
   vms_computer_names    = [for i in range(var.cluster_size - 1) : "${var.prefix}-${var.cluster_name}-backend-${i}"]
@@ -135,10 +135,10 @@ locals {
   })
 
   deploy_script = templatefile("${path.module}/deploy.sh", {
-    memory          = var.container_number_map[var.instance_type].memory[local.get_compute_memory_index]
-    compute_num     = var.add_frontend_container == false ? var.container_number_map[var.instance_type].compute + 1 : var.container_number_map[var.instance_type].compute
-    frontend_num    = var.add_frontend_container == false ? 0 : var.container_number_map[var.instance_type].frontend
-    drive_num       = var.container_number_map[var.instance_type].drive
+    memory          = var.containers_config_map[var.instance_type].memory[local.get_compute_memory_index]
+    compute_num     = var.add_frontend_container == false ? var.containers_config_map[var.instance_type].compute + 1 : var.containers_config_map[var.instance_type].compute
+    frontend_num    = var.add_frontend_container == false ? 0 : var.containers_config_map[var.instance_type].frontend
+    drive_num       = var.containers_config_map[var.instance_type].drive
     nics_num        = local.nics_numbers
     install_dpdk    = var.install_cluster_dpdk
     subnet_prefixes = data.azurerm_subnet.subnet.address_prefix
