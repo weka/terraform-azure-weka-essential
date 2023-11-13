@@ -17,7 +17,7 @@ variable "vnet_rg_name" {
 
 variable "vm_username" {
   type        = string
-  description = "The user name for logging in to the virtual machines."
+  description = "Provided as part of output for automated use of terraform, in case of custom AMI and automated use of outputs replace this with user that should be used for ssh connection"
   default     = "weka"
 }
 
@@ -110,7 +110,7 @@ variable "ssh_public_key" {
 variable "assign_public_ip" {
   type        = bool
   default     = true
-  description = "Determines whether to assign public ip."
+  description = "Determines whether to assign public IP to all instances deployed by TF module. Includes backends, clients and protocol gateways"
 }
 
 variable "containers_config_map" {
@@ -207,7 +207,7 @@ variable "stripe_width" {
 variable "hotspare" {
   type        = number
   default     = 1
-  description = "Hot-spare value."
+  description = "Number of hotspares to set on weka cluster. Refer to https://docs.weka.io/overview/ssd-capacity-management#hot-spare"
 }
 
 variable "install_cluster_dpdk" {
@@ -216,7 +216,7 @@ variable "install_cluster_dpdk" {
   description = "Install weka cluster with DPDK"
 }
 
-variable "add_frontend_container" {
+variable "set_dedicated_fe_container" {
   type        = bool
   default     = true
   description = "Create cluster with FE containers"
@@ -241,25 +241,25 @@ variable "install_weka_url" {
 }
 
 ################################################## obs variables ###################################################
-variable "set_obs" {
+variable "tiering_enable_obs" {
   type        = bool
   default     = false
   description = "Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration."
 }
 
-variable "obs_name" {
+variable "tiering_obs_name" {
   type        = string
   default     = ""
   description = "Name of obs storage account"
 }
 
-variable "obs_container_name" {
+variable "tiering_obs_container_name" {
   type        = string
   default     = ""
   description = "Name of obs container name"
 }
 
-variable "blob_obs_access_key" {
+variable "tiering_blob_obs_access_key" {
   type        = string
   description = "The access key of the existing Blob object store container."
   sensitive   = true
@@ -272,6 +272,7 @@ variable "tiering_ssd_percent" {
   description = "When set_obs_integration is true, this variable sets the capacity percentage of the filesystem that resides on SSD. For example, for an SSD with a total capacity of 20GB, and the tiering_ssd_percent is set to 20, the total available capacity is 100GB."
 }
 
+####################### clients ###########################
 variable "clients_number" {
   type        = number
   description = "The number of client virtual machines to deploy."
@@ -284,75 +285,139 @@ variable "client_instance_type" {
   default     = "Standard_D8_v5"
 }
 
-variable "client_nics_num" {
+variable "client_frontend_cores" {
   type        = string
-  description = "The client NICs number."
+  description = "Number of frontend cores to use on client instances, this number will reflect on number of NICs attached to instance, as each weka core requires dedicated NIC"
   default     = 2
 }
 
-variable "mount_clients_dpdk" {
+variable "clients_use_dpdk" {
   type        = bool
   default     = true
   description = "Mount weka clients in DPDK mode"
 }
 
-variable "protocol_gateways_number" {
-  type        = number
-  description = "The number of protocol gateway virtual machines to deploy."
-  default     = 0
-}
-
-variable "protocol" {
+variable "client_source_image_id" {
   type        = string
-  description = "Name of the protocol."
-  default     = "NFS"
-
-  validation {
-    condition     = contains(["NFS", "SMB"], var.protocol)
-    error_message = "Allowed values for protocol: NFS, SMB."
-  }
+  default     = "/communityGalleries/WekaIO-d7d3f308-d5a1-4c45-8e8a-818aed57375a/images/ubuntu20.04/versions/latest"
+  description = "Use weka custom image, ubuntu 20.04 with kernel 5.4 and ofed 5.8-1.1.2.1"
 }
 
-variable "protocol_gateway_secondary_ips_per_nic" {
-  type        = number
-  description = "Number of secondary IPs per single NIC per protocol gateway virtual machine."
-  default     = 1
-}
-
-variable "protocol_gateway_instance_type" {
+variable "client_placement_group_id" {
   type        = string
-  description = "The protocol gateways' virtual machine type (sku) to deploy."
-  default     = "Standard_D8_v5"
+  description = "The client instances placement group id. Backend placement group can be reused. If not specified placement group will be created automatically"
+  default     = ""
 }
 
-variable "protocol_gateway_nics_num" {
-  type        = string
-  description = "The protocol gateways' NICs number."
-  default     = 2
-}
-
-variable "protocol_gateway_disk_size" {
-  type        = number
-  default     = 48
-  description = "The protocol gateways' default disk size."
-}
-
-variable "protocol_gateway_frontend_num" {
-  type        = number
-  default     = 1
-  description = "The number of frontend cores on single protocol gateway machine."
-}
-
-variable "allow_ssh_ranges" {
+variable "allow_ssh_cidrs" {
   type        = list(string)
   description = "Allow port 22, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
   default     = []
 }
 
-variable "allow_weka_api_ranges" {
+variable "allow_weka_api_cidrs" {
   type        = list(string)
-  description = "Allow port 14000, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
+  description = "Allow connection to port 14000 on weka backends and ALB(if exists and not provided with dedicated SG)  from specified CIDRs, by default no CIDRs are allowed. All ports (including 14000) are allowed within VPC"
   default     = []
+}
+
+variable "zone" {
+  type        = string
+  description = "The zone in which the resources should be created."
+  default     = "1"
+}
+
+variable "weka_home_url" {
+  type        = string
+  description = "Weka Home url"
+  default     = ""
+}
+
+
+############################################### nfs protocol gateways variables ###################################################
+variable "nfs_protocol_gateways_number" {
+  type        = number
+  description = "The number of protocol gateway virtual machines to deploy."
+  default     = 0
+}
+
+variable "nfs_protocol_gateway_secondary_ips_per_nic" {
+  type        = number
+  description = "Number of secondary IPs per single NIC per protocol gateway virtual machine."
+  default     = 3
+}
+
+variable "nfs_protocol_gateway_instance_type" {
+  type        = string
+  description = "The protocol gateways' virtual machine type (sku) to deploy."
+  default     = "Standard_D8_v5"
+}
+
+variable "nfs_protocol_gateway_nics_num" {
+  type        = string
+  description = "The protocol gateways' NICs number."
+  default     = 2
+}
+
+variable "nfs_protocol_gateway_disk_size" {
+  type        = number
+  default     = 48
+  description = "The protocol gateways' default disk size."
+}
+
+variable "nfs_protocol_gateway_frontend_cores_num" {
+  type        = number
+  default     = 1
+  description = "The number of frontend cores on single protocol gateway machine."
+}
+
+variable "nfs_setup_protocol" {
+  type        = bool
+  description = "Config protocol, default if false"
+  default     = false
+}
+
+############################################### smb protocol gateways variables ###################################################
+variable "smb_protocol_gateways_number" {
+  type        = number
+  description = "The number of protocol gateway virtual machines to deploy."
+  default     = 0
+}
+
+variable "smb_protocol_gateway_secondary_ips_per_nic" {
+  type        = number
+  description = "Number of secondary IPs per single NIC per protocol gateway virtual machine."
+  default     = 3
+}
+
+variable "smb_protocol_gateway_instance_type" {
+  type        = string
+  description = "The protocol gateways' virtual machine type (sku) to deploy."
+  default     = "Standard_D8_v5"
+}
+
+variable "smb_protocol_gateway_nics_num" {
+  type        = string
+  description = "The protocol gateways' NICs number."
+  default     = 2
+}
+
+variable "smb_protocol_gateway_disk_size" {
+  type        = number
+  default     = 48
+  description = "The protocol gateways' default disk size."
+}
+
+variable "smb_protocol_gateway_frontend_cores_num" {
+  type        = number
+  default     = 1
+  description = "The number of frontend cores on single protocol gateway machine."
+}
+
+variable "smb_setup_protocol" {
+  type        = bool
+  description = "Config protocol, default if false"
+  default     = false
 }
 
 variable "smbw_enabled" {
@@ -386,7 +451,7 @@ variable "smb_domain_netbios_name" {
 
 variable "smb_dns_ip_address" {
   type        = string
-  description = "DNS IP address. If provided, will be added to /etc/resolved.conf to use this dns address for name resolution."
+  description = "DNS IP address"
   default     = ""
 }
 
@@ -394,16 +459,4 @@ variable "smb_share_name" {
   type        = string
   description = "The name of the SMB share"
   default     = "default"
-}
-
-variable "zone" {
-  type        = string
-  description = "The zone in which the resources should be created."
-  default     = "1"
-}
-
-variable "weka_home_url" {
-  type        = string
-  description = "Weka Home url"
-  default     = ""
 }

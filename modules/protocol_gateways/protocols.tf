@@ -70,7 +70,7 @@ resource "azurerm_network_interface" "primary_gateway_nic_private" {
 }
 
 locals {
-  secondary_nics_num = (var.nics - 1) * var.gateways_number
+  secondary_nics_num = (local.nics_num - 1) * var.gateways_number
 }
 
 resource "azurerm_network_interface" "secondary_gateway_nic" {
@@ -89,13 +89,13 @@ resource "azurerm_network_interface" "secondary_gateway_nic" {
 }
 
 locals {
-  disk_size             = var.disk_size + var.traces_per_frontend * var.frontend_num
+  disk_size             = var.disk_size + var.traces_per_frontend * var.frontend_cores_num
   first_nic_ids         = var.assign_public_ip ? azurerm_network_interface.primary_gateway_nic_public.*.id : azurerm_network_interface.primary_gateway_nic_private.*.id
   first_nic_private_ips = var.assign_public_ip ? azurerm_network_interface.primary_gateway_nic_public.*.private_ip_address : azurerm_network_interface.primary_gateway_nic_private.*.private_ip_address
-
+  nics_num              = var.frontend_cores_num + 1
   preparation_script = templatefile("${path.module}/../../preparation.sh", {
     apt_repo_url = var.apt_repo_url
-    nics_num     = var.nics
+    nics_num     = local.nics_num
     subnet_range = data.azurerm_subnet.subnet.address_prefix
   })
 
@@ -108,7 +108,7 @@ locals {
   })
 
   deploy_script = templatefile("${path.module}/deploy_protocol_gateways.sh", {
-    frontend_num    = var.frontend_num
+    frontend_num    = var.frontend_cores_num
     subnet_prefixes = data.azurerm_subnet.subnet.address_prefix
     backend_ips     = join(",", var.backend_ips)
   })
@@ -127,15 +127,16 @@ locals {
     dns_ip              = var.smb_dns_ip_address
     gateways_number     = var.gateways_number
     gateways_name       = var.gateways_name
-    frontend_num        = var.frontend_num
+    frontend_cores_num  = var.frontend_cores_num
     share_name          = var.smb_share_name
   })
 
-  setup_protocol_script = var.protocol == "NFS" ? local.setup_nfs_protocol_script : local.setup_smb_protocol_script
+  protocol_script = var.protocol == "NFS" ? local.setup_nfs_protocol_script : local.setup_smb_protocol_script
+
+  setup_protocol_script = var.setup_protocol ? local.protocol_script : ""
 
   custom_data_parts = [
-    local.preparation_script, local.attach_disk_script,
-    local.install_weka_script, local.deploy_script, local.setup_protocol_script
+    local.preparation_script, local.attach_disk_script, local.install_weka_script, local.deploy_script, local.setup_protocol_script
   ]
   custom_data = join("\n", local.custom_data_parts)
 }
@@ -156,7 +157,7 @@ resource "azurerm_linux_virtual_machine" "vms" {
 
   network_interface_ids = concat(
     [local.first_nic_ids[count.index]],
-    slice(azurerm_network_interface.secondary_gateway_nic.*.id, (var.nics - 1) * count.index, (var.nics - 1) * (count.index + 1))
+    slice(azurerm_network_interface.secondary_gateway_nic.*.id, (local.nics_num - 1) * count.index, (local.nics_num - 1) * (count.index + 1))
   )
 
   os_disk {
@@ -189,7 +190,7 @@ resource "azurerm_linux_virtual_machine" "vms" {
       error_message = "The number of secondary IPs per single NIC per protocol gateway virtual machine must be at most 3 for SMB."
     }
     precondition {
-      condition = var.frontend_num < var.nics
+      condition = var.frontend_cores_num < local.nics_num
       error_message = "The number of frontends must be less than the number of NICs."
     }
   }

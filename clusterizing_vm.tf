@@ -11,13 +11,13 @@ locals {
     protection_level    = var.protection_level
     hotspare            = var.hotspare
     install_dpdk        = var.install_cluster_dpdk
-    set_obs             = var.set_obs
+    set_obs             = var.tiering_enable_obs
     tiering_ssd_percent = var.tiering_ssd_percent
-    obs_name            = var.obs_name
-    obs_container_name  = var.obs_container_name
-    blob_obs_access_key = var.blob_obs_access_key
+    obs_name            = var.tiering_obs_name
+    obs_container_name  = var.tiering_obs_container_name
+    blob_obs_access_key = var.tiering_blob_obs_access_key
     smbw_enabled        = var.smbw_enabled
-    add_frontend        = var.add_frontend_container
+    add_frontend        = var.set_dedicated_fe_container
     weka_home_url       = var.weka_home_url
   })
 }
@@ -62,8 +62,8 @@ resource "azurerm_linux_virtual_machine" "clusterizing" {
 
 
 resource "azurerm_role_assignment" "clusterizing-vm-assignment" {
-  count                = var.set_obs ? 1 : 0
-  scope                = "${data.azurerm_storage_account.sa[0].id}/blobServices/default/containers/${var.obs_container_name}"
+  count                = var.tiering_enable_obs ? 1 : 0
+  scope                = "${data.azurerm_storage_account.sa[0].id}/blobServices/default/containers/${var.tiering_obs_container_name}"
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_linux_virtual_machine.clusterizing.identity[0].principal_id
   depends_on           = [azurerm_linux_virtual_machine.clusterizing]

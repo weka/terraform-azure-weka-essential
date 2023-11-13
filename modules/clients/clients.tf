@@ -21,7 +21,7 @@ resource "azurerm_network_interface" "primary_client_nic_public" {
   name                          = "${var.clients_name}-primary-nic-${count.index}"
   location                      = data.azurerm_resource_group.rg.location
   resource_group_name           = var.rg_name
-  enable_accelerated_networking = var.mount_clients_dpdk
+  enable_accelerated_networking = var.clients_use_dpdk
 
   ip_configuration {
     primary                       = true
@@ -37,7 +37,7 @@ resource "azurerm_network_interface" "primary_client_nic_private" {
   name                          = "${var.clients_name}-primary-nic-${count.index}"
   location                      = data.azurerm_resource_group.rg.location
   resource_group_name           = var.rg_name
-  enable_accelerated_networking = var.mount_clients_dpdk
+  enable_accelerated_networking = var.clients_use_dpdk
 
   ip_configuration {
     primary                       = true
@@ -49,7 +49,7 @@ resource "azurerm_network_interface" "primary_client_nic_private" {
 
 
 locals {
-  secondary_nics_num = (var.nics - 1) * var.clients_number
+  secondary_nics_num = (local.nics_num - 1) * var.clients_number
 }
 
 resource "azurerm_network_interface" "client_nic" {
@@ -57,7 +57,7 @@ resource "azurerm_network_interface" "client_nic" {
   name                          = "${var.clients_name}-secondary-nic-${count.index + var.clients_number}"
   location                      = data.azurerm_resource_group.rg.location
   resource_group_name           = var.rg_name
-  enable_accelerated_networking = var.mount_clients_dpdk
+  enable_accelerated_networking = var.clients_use_dpdk
 
   ip_configuration {
     primary                       = true
@@ -68,18 +68,19 @@ resource "azurerm_network_interface" "client_nic" {
 }
 
 locals {
+  nics_num           = var.frontend_cores + 1
   preparation_script = templatefile("${path.module}/../../preparation.sh", {
     apt_repo_url     = var.apt_repo_url
-    nics_num         = var.nics
+    nics_num         = local.nics_num
     subnet_range     = data.azurerm_subnet.subnet.address_prefix
   })
 
   mount_wekafs_script = templatefile("${path.module}/mount_wekafs.sh", {
     all_subnets = split("/", data.azurerm_subnet.subnet.address_prefix)[0]
     all_gateways = cidrhost(data.azurerm_subnet.subnet.address_prefix, 1)
-    nics_num           = var.nics
+    nics_num           = local.nics_num
     backend_ips        = join(" ", var.backend_ips)
-    mount_clients_dpdk = var.mount_clients_dpdk
+    mount_clients_dpdk = var.clients_use_dpdk
   })
 
 
@@ -105,7 +106,7 @@ resource "azurerm_linux_virtual_machine" "vms" {
   network_interface_ids = concat(
     # The first Network Interface ID in this list is the Primary Network Interface on the Virtual Machine.
     [local.primary_nic_ids[count.index]],
-     slice(azurerm_network_interface.client_nic.*.id, (var.nics - 1) * count.index, (var.nics - 1) * (count.index + 1))
+     slice(azurerm_network_interface.client_nic.*.id, (local.nics_num - 1) * count.index, (local.nics_num - 1) * (count.index + 1))
   )
 
   os_disk {

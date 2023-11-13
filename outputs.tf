@@ -20,9 +20,14 @@ output "client_ips" {
   description = "If 'assign_public_ip' is set to true, it will output clients public ips, otherwise private ips."
 }
 
-output "protocol_gateway_ips" {
-  value       = length(module.protocol_gateways) > 0 ? flatten(module.protocol_gateways.0.protocol_gateway_ips) : null
-  description = "If 'assign_public_ip' is set to true, it will output protocol gateway public ips, otherwise private ips."
+output "nfs_protocol_gateway_ips" {
+  value       = var.nfs_protocol_gateways_number > 0 ? module.nfs_protocol_gateways[0].protocol_gateways_ips : null
+  description = "If 'private_network' is set to false, it will output nfs protocol gateway public ips, otherwise private ips."
+}
+
+output "smb_protocol_gateway_ips" {
+  value       = var.smb_protocol_gateways_number > 0 ? module.smb_protocol_gateways[0].protocol_gateways_ips : null
+  description = "If 'private_network' is set to false, it will output smb protocol gateway public ips, otherwise private ips."
 }
 
 output "ssh_user" {
