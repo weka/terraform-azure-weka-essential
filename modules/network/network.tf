@@ -28,7 +28,7 @@ resource "azurerm_subnet" "subnet" {
 
 # ====================== sg ssh ========================== #
 resource "azurerm_network_security_rule" "sg_public_ssh" {
-  count                       = length(var.allow_ssh_ranges)
+  count                       = length(var.allow_ssh_cidrs)
   name                        = "${var.prefix}-ssh-sg-${count.index}"
   resource_group_name         = data.azurerm_resource_group.rg.name
   priority                    = 1000 + (count.index + 1)
@@ -37,14 +37,14 @@ resource "azurerm_network_security_rule" "sg_public_ssh" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = element(var.allow_ssh_ranges, count.index)
+  source_address_prefix       = element(var.allow_ssh_cidrs, count.index)
   destination_address_prefix  = "*"
   network_security_group_name = azurerm_network_security_group.sg.name
 }
 
 # ====================== sg weka ========================== #
 resource "azurerm_network_security_rule" "sg_weka" {
-  count                       = length(var.allow_weka_api_ranges)
+  count                       = length(var.allow_weka_api_cidrs)
   name                        = "${var.prefix}-weka-sg-${count.index}"
   resource_group_name         = data.azurerm_resource_group.rg.name
   priority                    = 2000 + (count.index + 1)
@@ -53,7 +53,7 @@ resource "azurerm_network_security_rule" "sg_weka" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "14000"
-  source_address_prefix       = element(var.allow_weka_api_ranges, count.index)
+  source_address_prefix       = element(var.allow_weka_api_cidrs, count.index)
   destination_address_prefix  = "*"
   network_security_group_name = azurerm_network_security_group.sg.name
 }

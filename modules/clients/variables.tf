@@ -3,9 +3,9 @@ variable "backend_ips" {
   description = ""
 }
 
-variable "nics" {
+variable "frontend_cores" {
   type        = number
-  default     = 2
+  default     = 1
   description = "Number of nics to set on each client vm"
 }
 
@@ -62,7 +62,7 @@ variable "apt_repo_url" {
   description = "The URL of the apt private repository."
 }
 
-variable "mount_clients_dpdk" {
+variable "clients_use_dpdk" {
   type        = bool
   default     = true
   description = "Install weka cluster with DPDK"
