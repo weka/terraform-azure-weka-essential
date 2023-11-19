@@ -21,10 +21,10 @@ locals {
 }
 
 module "network" {
-  source          = "../modules/network"
-  prefix          = local.prefix
-  rg_name         = local.vnet_rg_name
-  address_space   = local.address_space
+  source        = "../modules/network"
+  prefix        = local.prefix
+  rg_name       = local.vnet_rg_name
+  address_space = local.address_space
   subnet_prefix = "10.0.0.0/24"
 }
 

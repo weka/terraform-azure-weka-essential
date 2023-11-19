@@ -1,5 +1,6 @@
 FAILURE_DOMAIN=$(printf $(hostname -I) | sha256sum | tr -d '-' | cut -c1-16)
-FRONTEND_CONTAINER_CORES_NUM=${frontend_num}
+FRONTEND_CONTAINER_CORES_NUM=${frontend_container_cores_num}
+NICS_NUM=$((FRONTEND_CONTAINER_CORES_NUM+1))
 SUBNET_PREFIXES=( "${subnet_prefixes}" )
 BACKEND_IPS="${backend_ips}"
 GATEWAYS=""
@@ -33,7 +34,7 @@ weka local rm default --force
 # weka containers setup
 get_core_ids $FRONTEND_CONTAINER_CORES_NUM frontend_core_ids
 
-getNetStrForDpdk 1 $(($FRONTEND_CONTAINER_CORES_NUM + 1)) "$GATEWAYS" "$SUBNETS"
+getNetStrForDpdk 1 $NICS_NUM "$GATEWAYS" "$SUBNETS"
 
 echo "$(date -u): setting up weka frontend"
 # changed standart frontend port to 14000 as it should be used locally for protocol setup:

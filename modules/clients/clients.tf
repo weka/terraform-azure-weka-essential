@@ -68,25 +68,25 @@ resource "azurerm_network_interface" "client_nic" {
 }
 
 locals {
-  nics_num           = var.frontend_cores + 1
+  nics_num = var.frontend_container_cores_num + 1
   preparation_script = templatefile("${path.module}/../../preparation.sh", {
-    apt_repo_url     = var.apt_repo_url
-    nics_num         = local.nics_num
-    subnet_range     = data.azurerm_subnet.subnet.address_prefix
+    apt_repo_url = var.apt_repo_url
+    nics_num     = local.nics_num
+    subnet_range = data.azurerm_subnet.subnet.address_prefix
   })
 
   mount_wekafs_script = templatefile("${path.module}/mount_wekafs.sh", {
-    all_subnets = split("/", data.azurerm_subnet.subnet.address_prefix)[0]
-    all_gateways = cidrhost(data.azurerm_subnet.subnet.address_prefix, 1)
-    nics_num           = local.nics_num
-    backend_ips        = join(" ", var.backend_ips)
-    mount_clients_dpdk = var.clients_use_dpdk
+    all_subnets                  = split("/", data.azurerm_subnet.subnet.address_prefix)[0]
+    all_gateways                 = cidrhost(data.azurerm_subnet.subnet.address_prefix, 1)
+    backend_ips                  = join(" ", var.backend_ips)
+    mount_clients_dpdk           = var.clients_use_dpdk
+    frontend_container_cores_num = var.frontend_container_cores_num
   })
 
 
-  primary_nic_ids = var.assign_public_ip ? azurerm_network_interface.primary_client_nic_public.*.id : azurerm_network_interface.primary_client_nic_private.*.id
+  primary_nic_ids   = var.assign_public_ip ? azurerm_network_interface.primary_client_nic_public.*.id : azurerm_network_interface.primary_client_nic_private.*.id
   custom_data_parts = [local.preparation_script, local.mount_wekafs_script]
-  vms_custom_data = base64encode(join("\n", local.custom_data_parts))
+  vms_custom_data   = base64encode(join("\n", local.custom_data_parts))
 }
 
 resource "azurerm_linux_virtual_machine" "vms" {
@@ -106,7 +106,7 @@ resource "azurerm_linux_virtual_machine" "vms" {
   network_interface_ids = concat(
     # The first Network Interface ID in this list is the Primary Network Interface on the Virtual Machine.
     [local.primary_nic_ids[count.index]],
-     slice(azurerm_network_interface.client_nic.*.id, (local.nics_num - 1) * count.index, (local.nics_num - 1) * (count.index + 1))
+    slice(azurerm_network_interface.client_nic.*.id, (local.nics_num - 1) * count.index, (local.nics_num - 1) * (count.index + 1))
   )
 
   os_disk {

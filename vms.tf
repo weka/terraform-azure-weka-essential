@@ -12,24 +12,24 @@ module "network" {
 }
 
 module "clients" {
-  count            = var.clients_number > 0 ? 1 : 0
-  source           = "./modules/clients"
-  rg_name          = var.rg_name
-  clients_name     = "${var.prefix}-${var.cluster_name}-client"
-  clients_number   = var.clients_number
-  apt_repo_url     = var.apt_repo_url
-  clients_use_dpdk = var.clients_use_dpdk
-  subnet_name      = data.azurerm_subnet.subnet.name
-  source_image_id  = var.client_source_image_id
-  vnet_name        = local.vnet_name
-  frontend_cores   = var.clients_use_dpdk ? var.client_frontend_cores : 1
-  instance_type    = var.client_instance_type
-  backend_ips      = local.first_nic_private_ips
-  ssh_public_key   = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
-  ppg_id           = var.client_placement_group_id != "" ? var.client_placement_group_id : azurerm_proximity_placement_group.ppg[0].id
-  assign_public_ip = var.assign_public_ip
-  vnet_rg_name     = local.vnet_rg_name
-  depends_on       = [azurerm_linux_virtual_machine.clusterizing, module.network]
+  count                        = var.clients_number > 0 ? 1 : 0
+  source                       = "./modules/clients"
+  rg_name                      = var.rg_name
+  clients_name                 = "${var.prefix}-${var.cluster_name}-client"
+  clients_number               = var.clients_number
+  apt_repo_url                 = var.apt_repo_url
+  clients_use_dpdk             = var.clients_use_dpdk
+  subnet_name                  = data.azurerm_subnet.subnet.name
+  source_image_id              = var.client_source_image_id
+  vnet_name                    = local.vnet_name
+  frontend_container_cores_num = var.clients_use_dpdk ? var.client_frontend_cores : 1
+  instance_type                = var.client_instance_type
+  backend_ips                  = local.first_nic_private_ips
+  ssh_public_key               = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
+  ppg_id                       = var.client_placement_group_id != "" ? var.client_placement_group_id : azurerm_proximity_placement_group.ppg[0].id
+  assign_public_ip             = var.assign_public_ip
+  vnet_rg_name                 = local.vnet_rg_name
+  depends_on                   = [azurerm_linux_virtual_machine.clusterizing, module.network]
 }
 
 data "azurerm_resource_group" "rg" {
