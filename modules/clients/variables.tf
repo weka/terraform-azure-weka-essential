@@ -3,7 +3,7 @@ variable "backend_ips" {
   description = ""
 }
 
-variable "frontend_cores" {
+variable "frontend_container_cores_num" {
   type        = number
   default     = 1
   description = "Number of nics to set on each client vm"

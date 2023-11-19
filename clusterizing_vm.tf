@@ -1,7 +1,7 @@
 locals {
   stripe_width_calculated = var.cluster_size - var.protection_level - 1
   stripe_width            = local.stripe_width_calculated < 16 ? local.stripe_width_calculated : 16
-  clusterize_script       = templatefile("${path.module}/clusterize.sh", {
+  clusterize_script = templatefile("${path.module}/clusterize.sh", {
     vm_names            = join(" ", local.vms_computer_names)
     private_ips         = join(" ", slice(local.first_nic_private_ips, 0, var.cluster_size - 1))
     cluster_name        = var.cluster_name
@@ -31,14 +31,14 @@ resource "azurerm_linux_virtual_machine" "clusterizing" {
   admin_username                  = var.vm_username
   computer_name                   = "${var.prefix}-${var.cluster_name}-backend-${var.cluster_size - 1}"
   disable_password_authentication = true
-  custom_data                     = base64encode(join("\n", [
+  custom_data = base64encode(join("\n", [
     local.preparation_script, local.attach_disk_script,
     local.install_weka_script, local.deploy_script, local.clusterize_script
   ]))
-  proximity_placement_group_id    = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
-  network_interface_ids           = concat([local.first_nic_ids[var.cluster_size - 1]], slice(azurerm_network_interface.private_nics.*.id, (local.nics_numbers - 1) * (var.cluster_size - 1), (local.nics_numbers - 1) * var.cluster_size))
-  tags                            = merge(var.tags_map, { "weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id })
-  source_image_id                 = var.source_image_id
+  proximity_placement_group_id = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
+  network_interface_ids        = concat([local.first_nic_ids[var.cluster_size - 1]], slice(azurerm_network_interface.private_nics.*.id, (local.nics_numbers - 1) * (var.cluster_size - 1), (local.nics_numbers - 1) * var.cluster_size))
+  tags                         = merge(var.tags_map, { "weka_cluster" : var.cluster_name, "user_id" : data.azurerm_client_config.current.object_id })
+  source_image_id              = var.source_image_id
   os_disk {
     caching              = "ReadWrite"
     name                 = "clusterizing-os-disk-${var.prefix}-${var.cluster_name}-${var.cluster_size - 1}"
