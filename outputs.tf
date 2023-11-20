@@ -30,9 +30,9 @@ output "smb_protocol_gateway_ips" {
   description = "If 'private_network' is set to false, it will output smb protocol gateway public ips, otherwise private ips."
 }
 
-output "ssh_user" {
+output "vm_username" {
   value       = var.vm_username
-  description = "ssh user for weka cluster"
+  description = "Provided as part of output for automated use of terraform, ssh user to weka cluster vm"
 }
 
 output "private_ssh_key" {
