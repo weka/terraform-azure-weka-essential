@@ -33,8 +33,7 @@ weka local rm default --force
 
 # weka containers setup
 get_core_ids $FRONTEND_CONTAINER_CORES_NUM frontend_core_ids
-
-getNetStrForDpdk 1 $NICS_NUM "$GATEWAYS" "$SUBNETS"
+getNetStrForDpdk 1 $NICS_NUM "$GATEWAYS"
 
 echo "$(date -u): setting up weka frontend"
 # changed standart frontend port to 14000 as it should be used locally for protocol setup:

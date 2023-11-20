@@ -39,7 +39,6 @@ mkdir -p $MOUNT_POINT
 weka local stop && weka local rm -f --all
 
 gateways="${all_gateways}"
-subnets="${all_subnets}"
 FRONTEND_CONTAINER_CORES_NUM="${frontend_container_cores_num}"
 NICS_NUM=$((FRONTEND_CONTAINER_CORES_NUM+1))
 net_option_name="-o net="
@@ -47,7 +46,7 @@ eth0=$(ifconfig | grep eth0 -C2 | grep 'inet ' | awk '{print $2}')
 
 mount_command="mount -t wekafs -o net=udp $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
 if [[ ${mount_clients_dpdk} == true ]]; then
-  getNetStrForDpdk 1 $NICS_NUM $gateways $subnets "$net_option_name"
+  getNetStrForDpdk 1 $NICS_NUM $gateways "$net_option_name"
   mount_command="mount -t wekafs $net -o num_cores=$FRONTEND_CONTAINER_CORES_NUM -o mgmt_ip=$eth0 $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
 fi
 
