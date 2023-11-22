@@ -133,6 +133,14 @@ variable "containers_config_map" {
       nics     = 4
       memory   = ["33GB", "31GB"]
     },
+    Standard_L8as_v3 = {
+      compute  = 1
+      drive    = 1
+      frontend = 1
+      nvme     = 1
+      nics     = 4
+      memory   = ["33GB", "31GB"]
+    },
     Standard_L16s_v3 = {
       compute  = 4
       drive    = 2
