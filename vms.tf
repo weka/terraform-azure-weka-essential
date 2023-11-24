@@ -26,7 +26,7 @@ module "clients" {
   instance_type                = var.client_instance_type
   backend_ips                  = local.first_nic_private_ips
   ssh_public_key               = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : var.ssh_public_key
-  ppg_id                       = var.client_placement_group_id != "" ? var.client_placement_group_id : azurerm_proximity_placement_group.ppg[0].id
+  ppg_id                       = var.client_placement_group_id == "" ? local.placement_group_id : var.client_placement_group_id
   assign_public_ip             = var.assign_public_ip
   vnet_rg_name                 = local.vnet_rg_name
   depends_on                   = [azurerm_linux_virtual_machine.clusterizing, module.network]
@@ -114,6 +114,8 @@ locals {
     local.install_weka_script, local.deploy_script
   ]
   custom_data = join("\n", local.custom_data_parts)
+
+  placement_group_id = var.placement_group_id != "" ? var.placement_group_id : azurerm_proximity_placement_group.ppg[0].id
 }
 
 resource "azurerm_proximity_placement_group" "ppg" {
