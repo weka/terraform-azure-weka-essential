@@ -164,7 +164,6 @@ protocol_gateways_number = 3
 protocol                 = "SMB"
 smbw_enabled             = true  // in case of SMB-W setup
 smb_domain_name          = "qa.wekatest.io"
-smb_dns_ip_address       = "10.3.0.4"  // optional
 ```
 To join an SMB cluster in Active Directory, need to run manually command:
 
