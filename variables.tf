@@ -163,7 +163,7 @@ variable "containers_config_map" {
       frontend = 1
       nvme     = 8
       nics     = 8
-      memory   = ["357GB", "384GB"]
+      memory   = ["227GB", "227GB"]
     }
   }
   validation {
