@@ -15,21 +15,65 @@ done
 GATEWAYS=$(echo "$GATEWAYS" | sed 's/ //')
 
 # get_core_ids bash function definition
+numa_ranges=()
+numa=()
 
-core_ids=$(cat /sys/devices/system/cpu/cpu*/topology/thread_siblings_list | cut -d "-" -f 1 |  cut -d "," -f 1 | sort -u | tr '\n' ' ')
-core_ids="$${core_ids[@]/0}"
-IFS=', ' read -r -a core_ids <<< "$core_ids"
+append_numa_core_ids_to_list() {
+  r=$1
+  dynamic_array=$2
+  numa_min=$(echo "$r" | awk -F"-" '{print $1}')
+  numa_max=$(echo "$r" | awk -F"-" '{print $2}')
+
+  thread_siblings_list=$(cat /sys/devices/system/cpu/cpu*/topology/thread_siblings_list)
+  while IFS= read -r thread_siblings; do
+    core_id=$(echo "$thread_siblings" | cut -d '-' -f 1 |  cut -d ',' -f 1)
+    if [[ $core_id -ne 0 && $core_id -ge $numa_min && $core_id -le $numa_max && ! $${dynamic_array[@]} =~ $core_id ]];then
+      dynamic_array+=($core_id)
+    fi
+  done <<< "$thread_siblings_list"
+}
+
+numa_num=$(lscpu | grep "NUMA node(s):" | awk '{print $3}')
+
+for ((i=0; i<$numa_num; i++));do
+  numa_ids=$(lscpu | grep "NUMA node$i CPU(s):" | awk '{print $4}')
+  numa_ranges[$i]=$numa_ids
+done
+for ((j=0; j<$numa_num; j++)); do
+      dynamic_array=()
+    if [[ "$${numa_ranges[$j]}" =~ "," ]]; then
+      IFS=',' read -ra range <<< "$${numa_ranges[$j]}"
+      for i in "$${range[@]}"; do
+        append_numa_core_ids_to_list "$i" $dynamic_array
+        numa[$j]="$${dynamic_array[@]}"
+      done
+    else
+      append_numa_core_ids_to_list "$${numa_ranges[$j]}" $dynamic_array
+      numa[$j]="$${dynamic_array[@]}"
+    fi
+done
+
 core_idx_begin=0
 get_core_ids() {
-	core_idx_end=$(($core_idx_begin + $1))
-	res=$${core_ids["$core_idx_begin"]}
-	for (( i=$(($core_idx_begin + 1)); i<$core_idx_end; i++ ))
-	do
-		res=$res,$${core_ids[i]}
-	done
-	core_idx_begin=$core_idx_end
-	eval "$2=$res"
+  core_idx_end=$(($core_idx_begin + $1))
+  core_ids=($${numa[0]})
+  res=$${core_ids["$core_idx_begin"]}
+  if [[ $${numa_num} > 1 && $2 == compute_core_ids ]]; then
+    for (( i=$(($core_idx_begin+1)); i<$core_idx_end; i++ )); do
+      index=$(($i%2))
+      core_ids=($${numa[$index]})
+      res=$res,$${core_ids[i]}
+    done
+  else
+    core_ids=($${numa[0]})
+    for (( i=$(($core_idx_begin + 1)); i<$core_idx_end; i++ )); do
+      res=$res,$${core_ids[i]}
+    done
+  fi
+  core_idx_begin=$core_idx_end
+      eval "$2=$res"
 }
+###################### end of get_core_ids function definition ######################
 
 weka local stop
 weka local rm default --force
