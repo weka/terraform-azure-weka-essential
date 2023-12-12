@@ -27,7 +27,7 @@ append_numa_core_ids_to_list() {
   thread_siblings_list=$(cat /sys/devices/system/cpu/cpu*/topology/thread_siblings_list)
   while IFS= read -r thread_siblings; do
     core_id=$(echo "$thread_siblings" | cut -d '-' -f 1 |  cut -d ',' -f 1)
-    if [[ $core_id -ne 0 && $core_id -ge $numa_min && $core_id -le $numa_max && ! $${dynamic_array[@]} =~ $core_id ]];then
+    if [[ $core_id -ne 0 && $core_id -ge $numa_min && $core_id -le $numa_max && ! " $${dynamic_array[@]} " =~ " $core_id " ]];then
       dynamic_array+=($core_id)
     fi
   done <<< "$thread_siblings_list"
@@ -56,16 +56,21 @@ done
 core_idx_begin=0
 get_core_ids() {
   core_idx_end=$(($core_idx_begin + $1))
-  core_ids=($${numa[0]})
-  res=$${core_ids["$core_idx_begin"]}
-  if [[ $${numa_num} > 1 && $2 == compute_core_ids ]]; then
+  if [[ $${numa_num} > 1 ]]; then
+    index=$((i%2))
+    core_ids=($${numa[$index]})
+    index_in_numa=$((core_idx_begin/2))
+    res=$${core_ids["$index_in_numa"]}
     for (( i=$(($core_idx_begin+1)); i<$core_idx_end; i++ )); do
-      index=$(($i%2))
+      echo "i: $i"
+      index=$((i%2))
       core_ids=($${numa[$index]})
-      res=$res,$${core_ids[i]}
+      index_in_numa=$((i/2))
+      res=$res,$${core_ids["$index_in_numa"]}
     done
   else
     core_ids=($${numa[0]})
+    res=$${core_ids["$core_idx_begin"]}
     for (( i=$(($core_idx_begin + 1)); i<$core_idx_end; i++ )); do
       res=$res,$${core_ids[i]}
     done
