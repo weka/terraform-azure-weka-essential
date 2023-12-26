@@ -104,8 +104,14 @@ smbw_cmd_extention=""
 if [[ ${smbw_enabled} == true ]]; then
     smbw_cmd_extention="--smbw --config-fs-name .config_fs"
 fi
+# new smbw config, where smbw is the default
+smb_cmd_extention=""
+if [[ ${smbw_enabled} == false ]]; then
+    smb_cmd_extention="--smb"
+fi
 
-weka smb cluster create ${cluster_name} ${domain_name} $smbw_cmd_extention --container-ids $all_container_ids_str
+weka smb cluster create ${cluster_name} ${domain_name} $smbw_cmd_extention --container-ids $all_container_ids_str || weka smb cluster create ${cluster_name} ${domain_name} .config_fs --container-ids $all_container_ids_str $smb_cmd_extention
+
 weka smb cluster wait
 
 
