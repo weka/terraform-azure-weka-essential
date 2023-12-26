@@ -150,7 +150,7 @@ variable "install_weka_url" {
 
 variable "smbw_enabled" {
   type        = bool
-  default     = false
+  default     = true
   description = "Enable SMBW protocol."
 }
 
