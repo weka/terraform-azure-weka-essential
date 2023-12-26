@@ -93,6 +93,13 @@ locals {
   first_nic_ids         = var.assign_public_ip ? azurerm_network_interface.primary_gateway_nic_public.*.id : azurerm_network_interface.primary_gateway_nic_private.*.id
   first_nic_private_ips = var.assign_public_ip ? azurerm_network_interface.primary_gateway_nic_public.*.private_ip_address : azurerm_network_interface.primary_gateway_nic_private.*.private_ip_address
   nics_num              = var.frontend_container_cores_num + 1
+  // foreach private_ip_addresses except the value equal to private_ip_address
+  first_nic_secondary_ips = flatten([
+    for nic in  var.assign_public_ip ? azurerm_network_interface.primary_gateway_nic_public : azurerm_network_interface.primary_gateway_nic_private : [
+      for ip in nic.private_ip_addresses : ip if ip != nic.private_ip_address
+    ]
+  ])
+
   preparation_script = templatefile("${path.module}/../../preparation.sh", {
     apt_repo_url = var.apt_repo_url
     nics_num     = local.nics_num
@@ -111,10 +118,10 @@ locals {
     frontend_container_cores_num = var.frontend_container_cores_num
     subnet_prefixes              = data.azurerm_subnet.subnet.address_prefix
     backend_ips                  = join(",", var.backend_ips)
+    gateways_name                = var.gateways_name
   })
 
   setup_nfs_protocol_script = templatefile("${path.module}/setup_nfs.sh", {
-    gateways_name        = var.gateways_name
     interface_group_name = var.interface_group_name
     client_group_name    = var.client_group_name
   })
@@ -127,6 +134,7 @@ locals {
     gateways_name                = var.gateways_name
     frontend_container_cores_num = var.frontend_container_cores_num
     share_name                   = var.smb_share_name
+    secondary_ips                = join(" ", local.first_nic_secondary_ips)
   })
 
   protocol_script = var.protocol == "NFS" ? local.setup_nfs_protocol_script : local.setup_smb_protocol_script
