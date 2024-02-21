@@ -25,6 +25,39 @@ resource "azurerm_subnet" "subnet" {
   depends_on = [data.azurerm_resource_group.rg, azurerm_virtual_network.vnet]
 }
 
+# ====================== NAT ============================= #
+resource "azurerm_public_ip_prefix" "nat_ip" {
+  count               = var.create_nat_gateway ? 1 : 0
+  name                = "${var.prefix}-nat-ip"
+  resource_group_name = var.rg_name
+  location            = data.azurerm_resource_group.rg.location
+  ip_version          = "IPv4"
+  prefix_length       = 29
+  sku                 = "Standard"
+}
+
+resource "azurerm_nat_gateway" "nat_gateway" {
+  count                   = var.create_nat_gateway ? 1 : 0
+  name                    = "${var.prefix}-nat-gateway"
+  resource_group_name     = var.rg_name
+  location                = data.azurerm_resource_group.rg.location
+  sku_name                = "Standard"
+  idle_timeout_in_minutes = 10
+}
+
+resource "azurerm_nat_gateway_public_ip_prefix_association" "nat_ip_association" {
+  count               = var.create_nat_gateway ? 1 : 0
+  nat_gateway_id      = azurerm_nat_gateway.nat_gateway[0].id
+  public_ip_prefix_id = azurerm_public_ip_prefix.nat_ip[0].id
+  depends_on          = [azurerm_nat_gateway.nat_gateway, azurerm_public_ip_prefix.nat_ip]
+}
+
+resource "azurerm_subnet_nat_gateway_association" "subnet_nat_gateway_association" {
+  count          = var.create_nat_gateway ? 1 : 0
+  subnet_id      = azurerm_subnet.subnet.id
+  nat_gateway_id = azurerm_nat_gateway.nat_gateway[0].id
+  depends_on     = [azurerm_subnet.subnet, azurerm_nat_gateway.nat_gateway]
+}
 
 # ====================== sg ssh ========================== #
 resource "azurerm_network_security_rule" "sg_public_ssh" {

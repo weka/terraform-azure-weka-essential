@@ -15,6 +15,12 @@ variable "vnet_rg_name" {
   default     = ""
 }
 
+variable "create_nat_gateway" {
+  type        = bool
+  description = "NAT needs to be created when no public ip is assigned to the backend, to allow internet access"
+  default     = false
+}
+
 variable "vm_username" {
   type        = string
   description = "Provided as part of output for automated use of terraform, in case of custom AMI and automated use of outputs replace this with user that should be used for ssh connection"
