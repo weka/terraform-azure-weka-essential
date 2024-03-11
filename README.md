@@ -292,7 +292,7 @@ In the output you will get the cluster backends (and clients if you asked for) i
 | <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | The virtual network name. | `string` | `""` | no |
 | <a name="input_vnet_rg_name"></a> [vnet\_rg\_name](#input\_vnet\_rg\_name) | Resource group name of vnet | `string` | `""` | no |
 | <a name="input_weka_home_url"></a> [weka\_home\_url](#input\_weka\_home\_url) | Weka Home url | `string` | `""` | no |
-| <a name="input_weka_version"></a> [weka\_version](#input\_weka\_version) | The Weka version to deploy. | `string` | `"4.2.8.66"` | no |
+| <a name="input_weka_version"></a> [weka\_version](#input\_weka\_version) | The Weka version to deploy. | `string` | `"4.2.9"` | no |
 | <a name="input_zone"></a> [zone](#input\_zone) | The zone in which the resources should be created. | `string` | `"1"` | no |
 
 ## Outputs
