@@ -80,7 +80,7 @@ variable "source_image_id" {
 variable "weka_version" {
   type        = string
   description = "The Weka version to deploy."
-  default     = "4.2.9"
+  default     = "4.2.9-1"
 }
 
 variable "get_weka_io_token" {
