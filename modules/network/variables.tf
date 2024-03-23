@@ -36,3 +36,8 @@ variable "allow_weka_api_cidrs" {
   description = "Allow connection to port 14000 on weka backends and ALB(if exists and not provided with dedicated SG)  from specified CIDRs, by default no CIDRs are allowed. All ports (including 14000) are allowed within VPC"
   default     = []
 }
+
+variable "create_nat_gateway" {
+  type        = bool
+  description = "NAT needs to be created when no public ip is assigned to the backend, to allow internet access"
+}

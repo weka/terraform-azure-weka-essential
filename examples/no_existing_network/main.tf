@@ -15,6 +15,7 @@ module "weka_deployment" {
   get_weka_io_token    = "..."
   allow_ssh_cidrs      = ["0.0.0.0/0"]
   allow_weka_api_cidrs = ["0.0.0.0/0"]
+  assign_public_ip     = true
 }
 
 output "weka_deployment_output" {

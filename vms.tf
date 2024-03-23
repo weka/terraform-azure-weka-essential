@@ -9,6 +9,7 @@ module "network" {
   subnet_prefix        = var.subnet_prefix
   allow_weka_api_cidrs = var.allow_weka_api_cidrs
   allow_ssh_cidrs      = var.allow_ssh_cidrs
+  create_nat_gateway   = var.create_nat_gateway
 }
 
 module "clients" {
